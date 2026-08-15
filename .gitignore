@@ -1,0 +1,8 @@
+/top-down-shooter/Builds_win
+/top-down-shooter/Builds_linux
+*.zip
+/top-down-shooter/WindowsBuilds
+/top-down-shooter/LinuxBuilds
+out
+*.plist
+build
