@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UIElements;
 
 [RequireComponent (typeof(Player))]
 public class PlayerController : MonoBehaviour
@@ -36,11 +35,11 @@ public class PlayerController : MonoBehaviour
     {
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
-        Vector3 movementVector3 = new Vector3(horizontal, vertical);
+        Vector3 movementVector3 = new(horizontal, vertical);
         movementVector3.z = 0f;
         if (movementVector3.magnitude > 1)
             movementVector3.Normalize();
-        Vector3 position = transform.position + movementVector3 * _player.PlayerTypeData.MovementSpeed * Time.deltaTime;
+        Vector3 position = transform.position + movementVector3 * (_player.PlayerTypeData.MovementSpeed * Time.deltaTime);
         if(position.x > 30f)
             position.x = 30f;
         if(position.x < -30f)
@@ -68,7 +67,8 @@ public class PlayerController : MonoBehaviour
 
         _lastShootTime = Time.time;
         Vector2Int position = transform.position.ToServer();
-        NetworkManager.Instance.TcpSendMessageToServer(string.Format("S;{0};{1};{2};", position.x, position.y, Mathf.RoundToInt(_player.Visual.transform.eulerAngles.z)));
+        NetworkManager.Instance.TcpSendMessageToServer(
+            $"S;{position.x};{position.y};{Mathf.RoundToInt(_player.Visual.transform.eulerAngles.z)};");
     }
 
     private void SendTransformData()
@@ -77,6 +77,7 @@ public class PlayerController : MonoBehaviour
             return;
 
         Vector2Int position = transform.position.ToServer();
-        NetworkManager.Instance.UdpSendMessageToServer(string.Format("{0};{1};{2};{3};", NetworkManager.Instance.PlayerID, position.x, position.y, Mathf.RoundToInt(_player.Visual.transform.eulerAngles.z)));
+        NetworkManager.Instance.UdpSendMessageToServer(
+            $"{NetworkManager.Instance.PlayerID};{position.x};{position.y};{Mathf.RoundToInt(_player.Visual.transform.eulerAngles.z)};");
     }
 }

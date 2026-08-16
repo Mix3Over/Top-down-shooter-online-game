@@ -20,10 +20,7 @@ public class Player : MonoBehaviour
     public void Init(PlayerTypeData playerTypeData, string playerName, int health)
     {
         PlayerTypeData = playerTypeData;
-        if(health > 0)
-            Health = health;
-        else
-            Health = playerTypeData.StartingHealth;
+        Health = health > 0 ? health : playerTypeData.StartingHealth;
         PlayerName = playerName;
 
         Visual = Instantiate(playerTypeData.VisualPrefab, transform);

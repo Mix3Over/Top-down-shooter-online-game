@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class Bullet : MonoBehaviour
 {
@@ -17,6 +16,6 @@ public class Bullet : MonoBehaviour
 
     private void Update()
     {
-        transform.position += transform.right * Time.deltaTime * _speed;
+        transform.position += transform.right * (Time.deltaTime * _speed);
     }
 }

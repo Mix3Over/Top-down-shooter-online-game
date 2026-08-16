@@ -1,5 +1,5 @@
 
-public class UIManager : MonoBehaviourSingleton<UIManager>
+public class UIManager : Singleton<UIManager>
 {
     public LobbyUI LobbyUI { get; private set; }
     public PlayerTypeSelectionUI PlayerTypeSelectionUI { get; private set; }

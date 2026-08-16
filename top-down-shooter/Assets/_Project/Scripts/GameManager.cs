@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
 
-public class GameManager : MonoBehaviourSingleton<GameManager>
+public class GameManager : Singleton<GameManager>
 {
     public event Action PlayerScoresUpdated;
 
@@ -14,8 +14,8 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
     [SerializeField] private Transform _playersParent;
 
     public IReadOnlyDictionary<int, Player> Players => _players;
-    private Dictionary<int, Player> _players = new ();
-    private Dictionary<int, Bullet> _bullets = new ();
+    private readonly Dictionary<int, Player> _players = new ();
+    private readonly Dictionary<int, Bullet> _bullets = new ();
     public Player LocalPlayer { get; private set; }
 
     private void Start()
@@ -23,7 +23,7 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
         Application.targetFrameRate = 60;
 
         NetworkManager.Instance.Connected += Connected;
-        NetworkManager.Instance.Disconnected += Disconected;
+        NetworkManager.Instance.Disconnected += Disconnected;
         NetworkManager.Instance.TcpMessageReceived += TcpMessageReceived;
         NetworkManager.Instance.UdpMessageReceived += UdpMessageReceived;
         UIManager.Instance.LobbyUI.Open();
@@ -34,7 +34,7 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
         if(NetworkManager.Instance == null)
             return;
         NetworkManager.Instance.Connected -= Connected;
-        NetworkManager.Instance.Disconnected -= Disconected;
+        NetworkManager.Instance.Disconnected -= Disconnected;
         NetworkManager.Instance.TcpMessageReceived -= TcpMessageReceived;
         NetworkManager.Instance.UdpMessageReceived -= UdpMessageReceived;
     }
@@ -44,14 +44,14 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
         //UIManager.Instance.LeaderboardUI.Open();
     }
 
-    private void Disconected()
+    private void Disconnected()
     {
-        foreach(var player in _players.Values) {
+        foreach(Player player in _players.Values) {
             if(player == null)
                 continue;
             Destroy(player.gameObject);
         }
-        foreach(var bullet in _bullets.Values) {
+        foreach(Bullet bullet in _bullets.Values) {
             if (bullet == null)
                 continue;            
             Destroy(bullet.gameObject);
@@ -85,7 +85,7 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
             return;
         }
 
-        string trimmedMessage = message.Substring(1).Trim(';');
+        string trimmedMessage = message[1..].Trim(';');
         switch (parts[0]) {
             case "I":
                 InitLocalPlayer(trimmedMessage);
@@ -142,12 +142,11 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
                 continue;
             }
 
-            if (!_players.ContainsKey(playerId)) {
+            if (!_players.TryGetValue(playerId, out Player player)) {
                 Debug.LogWarning($"Player with ID:{playerId} doesn't exist");
                 continue;
             }
 
-            Player player = _players[playerId];
             player.SetScore(score);
         }
         PlayerScoresUpdated?.Invoke();
@@ -188,35 +187,32 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
             return;
         }
 
-        if(!_bullets.ContainsKey(bulletId)) {
+        if(!_bullets.TryGetValue(bulletId, out Bullet bullet)) {
             Debug.LogWarning($"Bullet with ID:{bulletId} doesn't exist");
             return;
         }
 
-        Bullet bullet = _bullets[bulletId];
         Destroy(bullet.gameObject);
 
-        if (!_players.ContainsKey(playerId)) {
+        if (!_players.TryGetValue(playerId, out Player player)) {
             Debug.LogWarning($"Player with ID:{playerId} doesn't exist");
             return;
         }
 
-        Player player = _players[playerId];
         player.SetHealth(health);
 
-        if (isAliveInt == 0) {
-            PlayerDeath(playerId);
-            return;
-        }
+        if (isAliveInt != 0) return;
+        
+        PlayerDeath(playerId);
     }
 
     private void PlayerDeath(int playerId)
     {
-        if(!_players.ContainsKey(playerId)) {
+        if(!_players.TryGetValue(playerId, out Player player)) {
             Debug.LogWarning($"Player with ID:{playerId} doesn't exist");
             return;
         }
-        Player player = _players[playerId];
+
         Destroy(player.gameObject);
 
         if(playerId == NetworkManager.Instance.PlayerID) {
@@ -259,14 +255,14 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
         Bullet bullet = bulletObject.GetComponent<Bullet>();
         _bullets[bulletId] = bullet;
 
-        Vector2Int position = new Vector2Int(positionX, positionY);
+        Vector2Int position = new(positionX, positionY);
 
-        if(!_players.ContainsKey(shooterId)) {
+        if(!_players.TryGetValue(shooterId, out Player player)) {
             Debug.LogWarning($"Player with ID:{shooterId} doesn't exist");
             return;
         }
 
-        float speed = _players[shooterId].PlayerTypeData.BulletSpeed;
+        float speed = player.PlayerTypeData.BulletSpeed;
         bullet.Init(position.ToLocal(), rotation, bulletId, speed);
     }
 
@@ -277,11 +273,11 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
             Debug.LogWarning("[GM] Failed to parse player ID: " + message);
             return;
         }
-        if (!_players.ContainsKey(playerId)) {
+        if (!_players.TryGetValue(playerId, out Player player)) {
             Debug.LogWarning($"Player with ID:{playerId} doesn't exist");
             return;
         }
-        Player player = _players[playerId];
+
         Destroy(player.gameObject);
         _players.Remove(playerId);
     }
@@ -316,17 +312,15 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
                 continue;
             }
 
-            if (!_players.ContainsKey(playerId)) {
+            if (!_players.TryGetValue(playerId, out Player player)) {
                 Debug.LogWarning($"Player with ID:{playerId} doesn't exist");
                 continue;
             }
 
-            Player player = _players[playerId];
-
             if (LocalPlayer == player)
                 continue;
 
-            Vector2Int position = new Vector2Int(positionX, positionY);
+            Vector2Int position = new(positionX, positionY);
             player.SetPositionAndRotation(position.ToLocal(), rotation);
         }
     }
@@ -341,7 +335,7 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
             return;
         }
 
-        Vector2Int position = new Vector2Int(int.Parse(parts[0]), int.Parse(parts[1]));
+        Vector2Int position = new(int.Parse(parts[0]), int.Parse(parts[1]));
         SpawnLocalPlayer(position.ToLocal(), UIManager.Instance.PlayerTypeSelectionUI.SelectedPlayerType);
     }
 
@@ -393,7 +387,7 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
             Debug.LogWarning("[GM] Failed to parse position Y");
             return;
         }
-        if (!int.TryParse(parts[5], out int rotation)) {
+        if (!int.TryParse(parts[5], out int _)) {
             Debug.LogWarning("[GM] Failed to parse rotation");
             return;
         }
@@ -409,11 +403,11 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
             return;
 
         if (_players.ContainsKey(playerId)) {
-            Debug.LogWarning($"Player with ID:{playerId} aleardy exist");
+            Debug.LogWarning($"Player with ID:{playerId} already exist");
             return;
         }
 
-        Vector2Int position = new Vector2Int(positionX, positionY);
+        Vector2Int position = new(positionX, positionY);
         SpawnRemotePlayer(position.ToLocal(), playerTypeIndex, playerId, playerName, health);
     }
 
