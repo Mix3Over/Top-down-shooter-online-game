@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class WindowUI : MonoBehaviour
+public class UIWindow : MonoBehaviour
 {
     private GameObject _content;
 
@@ -10,7 +10,7 @@ public class WindowUI : MonoBehaviour
         Close();
     }
 
-    public void Open()
+    public virtual void Open()
     {
         _content.SetActive(true);
     }

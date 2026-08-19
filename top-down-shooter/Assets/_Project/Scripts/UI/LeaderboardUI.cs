@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
 
-public class LeaderboardUI : WindowUI
+public class LeaderboardUI : UIWindow
 {
     [SerializeField] private Transform _leaderboardListParent;
     [SerializeField] private Color _normalColor;

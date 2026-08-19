@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerTypeSelectionUI : WindowUI
+public class PlayerTypeSelectionUI : UIWindow
 {
     [SerializeField] private List<Button> _buttons = new List<Button>();
     [SerializeField] private Button _disconnectButton;

@@ -3,10 +3,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LobbyUI : WindowUI
+public class LobbyUI : UIWindow
 {
     [SerializeField] private TMP_InputField _nameInputField;
-    [SerializeField] private TMP_InputField _adressInputField;
+    [SerializeField] private TMP_InputField _addressInputField;
     [SerializeField] private TMP_InputField _portInputField;
 
     [SerializeField] private Button _joinButton;
@@ -33,15 +33,12 @@ public class LobbyUI : WindowUI
             return;
         }
 
-        if (!IPAddress.TryParse(_adressInputField.text, out IPAddress ipAddr)) {
-            UIManager.Instance.InfoUI.Open("Incorrect IP adress!", "Ok", null);
-            Debug.Log("Incorrect IP adress");
+        if (!IPAddress.TryParse(_addressInputField.text, out IPAddress ipAddr)) {
+            UIManager.Instance.InfoUI.Open("Incorrect IP address!", "Ok", null);
+            Debug.Log("Incorrect IP address");
             return;
         }
-
-        _nameInputField.text.Replace('~', '-');
-        _nameInputField.text.Replace(':', '.');
-        _nameInputField.text.Replace(';', '.');
+        _nameInputField.text = _nameInputField.text.Replace('~', '.').Replace(':', '.').Replace(';', '.').Replace('!', '.');
 
         NetworkManager.Instance.ConnectToServer(ipAddr, port, _nameInputField.text);
         Close();

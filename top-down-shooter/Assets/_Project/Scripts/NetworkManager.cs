@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class NetworkManager : Singleton<NetworkManager>
 {
@@ -18,27 +17,24 @@ public class NetworkManager : Singleton<NetworkManager>
     public bool IsConnected { get; private set; }
     public int UdpLocalPort { get; private set; }
 
-    [SerializeField] private Button _disconnectButton;
-
+    private const int TimeoutSeconds = 3;
+    
     private Socket _tcpSocket;
     private UdpClient _udpClient;
 
     private CancellationTokenSource _connectCancelToken;
 
-    private const int TimeoutSeconds = 3;
-    private float _lastReceiveTime;
+    private float _lastMessageReceivedTime;
 
     private void Start()
     {
-        _disconnectButton.onClick.AddListener(() => Disconnect());
-
-        TcpMessageReceived += _ => _lastReceiveTime = Time.time;
-        UdpMessageReceived += _ => _lastReceiveTime = Time.time;
+        TcpMessageReceived += _ => _lastMessageReceivedTime = Time.time;
+        UdpMessageReceived += _ => _lastMessageReceivedTime = Time.time;
     }
 
     private void Update()
     {
-        if (!IsConnected || Time.time - _lastReceiveTime < TimeoutSeconds) 
+        if (!IsConnected || Time.time - _lastMessageReceivedTime < TimeoutSeconds) 
             return;
         
         Debug.Log("Connection timed out due to inactivity.");
@@ -122,13 +118,14 @@ public class NetworkManager : Singleton<NetworkManager>
         IPEndPoint localEndPoint = (IPEndPoint)_udpClient.Client.LocalEndPoint;
         UdpLocalPort = localEndPoint.Port;
 
-        _lastReceiveTime = Time.time;
+        _lastMessageReceivedTime = Time.time;
         IsConnected = true;
+        
+        SceneLoader.StartGame();
 
         TcpReceiveLoop();
         UdpReceiveLoop();
         Connected?.Invoke();
-        _disconnectButton.gameObject.SetActive(true);
     }
 
     private async void UdpReceiveLoop()
@@ -213,8 +210,6 @@ public class NetworkManager : Singleton<NetworkManager>
 
     public void Disconnect(bool openUI = true)
     {
-        if(_disconnectButton != null)
-            _disconnectButton.gameObject.SetActive(false);
         Debug.Log("Disconnecting from server...");
         Disconnected?.Invoke();
         IsConnected = false;

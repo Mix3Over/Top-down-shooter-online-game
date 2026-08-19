@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class InfoUI : WindowUI
+public class InfoUI : UIWindow
 {
     [SerializeField] private TMP_Text _text;
     [SerializeField] private Button _confirmButton;
