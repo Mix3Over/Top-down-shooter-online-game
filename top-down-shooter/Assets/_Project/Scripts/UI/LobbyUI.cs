@@ -11,7 +11,7 @@ public class LobbyUI : UIWindow
 
     [SerializeField] private Button _joinButton;
 
-    public string PlayerName => _nameInputField.text;   
+    public string PlayerName => _nameInputField.text;
 
     protected override void Awake()
     {
@@ -24,18 +24,15 @@ public class LobbyUI : UIWindow
     {
         if(!int.TryParse(_portInputField.text, out int port)) {
             UIManager.Instance.InfoUI.Open("Incorrect port!", "Ok", null);
-            Debug.Log("Incorrect port!");
             return;
         }
         if(_nameInputField.text.Length == 0) {
             UIManager.Instance.InfoUI.Open("Enter your name!", "Ok", null);
-            Debug.Log("Please enter your name!");
             return;
         }
 
         if (!IPAddress.TryParse(_addressInputField.text, out IPAddress ipAddr)) {
             UIManager.Instance.InfoUI.Open("Incorrect IP address!", "Ok", null);
-            Debug.Log("Incorrect IP address");
             return;
         }
         _nameInputField.text = _nameInputField.text.Replace('~', '.').Replace(':', '.').Replace(';', '.').Replace('!', '.');

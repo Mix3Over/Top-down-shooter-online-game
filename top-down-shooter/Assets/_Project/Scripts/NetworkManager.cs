@@ -91,9 +91,6 @@ public class NetworkManager : Singleton<NetworkManager>
             return;
         }
 
-        UIManager.Instance.LobbyUI.Close();
-        UIManager.Instance.PlayerTypeSelectionUI.Open();
-
         Debug.Log("Connected to server via TCP");
         string message = await TcpReceiveMessage();
         Debug.Log("Received TCP init message: " + message);
@@ -149,7 +146,7 @@ public class NetworkManager : Singleton<NetworkManager>
     private async void TcpReceiveLoop()
     {
         Debug.Log("[TCP] Started read loop...");
-        var message = "";
+        string message = "";
         while (IsConnected) {
             try {
                 while (message.IndexOf('~') == -1) {
@@ -220,15 +217,8 @@ public class NetworkManager : Singleton<NetworkManager>
         _tcpSocket?.Close();
         _tcpSocket?.Dispose();
 
-        if (UIManager.Instance == null) return;
-        if(UIManager.Instance.InfoUI != null)
-            UIManager.Instance.InfoUI.Close();
-        if(UIManager.Instance.PlayerTypeSelectionUI != null)
-            UIManager.Instance.PlayerTypeSelectionUI.Close();
-        if(UIManager.Instance.LobbyUI != null)
-            UIManager.Instance.LobbyUI.Close();
-        if (openUI && UIManager.Instance.LobbyUI != null)
-            UIManager.Instance.LobbyUI.Open();
+        if(openUI)
+            SceneLoader.OpenMainMenu();
     }
 
     private void OnDestroy()

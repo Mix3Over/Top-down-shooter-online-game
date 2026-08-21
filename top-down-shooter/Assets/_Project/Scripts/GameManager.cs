@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -21,41 +22,31 @@ public class GameManager : Singleton<GameManager>
     private void Start()
     {
         Application.targetFrameRate = 60;
-
-        NetworkManager.Instance.Connected += Connected;
-        NetworkManager.Instance.Disconnected += Disconnected;
-        NetworkManager.Instance.TcpMessageReceived += TcpMessageReceived;
-        NetworkManager.Instance.UdpMessageReceived += UdpMessageReceived;
         UIManager.Instance.LobbyUI.Open();
     }
 
-    private void OnDestroy()
+    private void OnEnable()
     {
-        if(NetworkManager.Instance == null)
-            return;
-        NetworkManager.Instance.Connected -= Connected;
-        NetworkManager.Instance.Disconnected -= Disconnected;
-        NetworkManager.Instance.TcpMessageReceived -= TcpMessageReceived;
-        NetworkManager.Instance.UdpMessageReceived -= UdpMessageReceived;
+        NetworkManager.Instance.Disconnected += OnDisconnected;
+        NetworkManager.Instance.TcpMessageReceived += OnTcpMessageReceived;
+        NetworkManager.Instance.UdpMessageReceived += OnUdpMessageReceived;
     }
 
-    private void Connected()
+    private void OnDisable()
     {
-        //UIManager.Instance.LeaderboardUI.Open();
+        NetworkManager.Instance.Disconnected -= OnDisconnected;
+        NetworkManager.Instance.TcpMessageReceived -= OnTcpMessageReceived;
+        NetworkManager.Instance.UdpMessageReceived -= OnUdpMessageReceived;
     }
 
-    private void Disconnected()
+    private void OnDisconnected()
     {
-        foreach(Player player in _players.Values) {
-            if(player == null)
-                continue;
+        foreach (Player player in _players.Values.Where(player => player != null))
             Destroy(player.gameObject);
-        }
-        foreach(Bullet bullet in _bullets.Values) {
-            if (bullet == null)
-                continue;            
+
+        foreach (Bullet bullet in _bullets.Values.Where(bullet => bullet != null))
             Destroy(bullet.gameObject);
-        }
+        
         _players.Clear();
         _bullets.Clear();
         LocalPlayer = null;
@@ -76,7 +67,7 @@ public class GameManager : Singleton<GameManager>
             $"{playerTypeData.StartingHealth};");
     }
 
-    private void TcpMessageReceived(string message)
+    private void OnTcpMessageReceived(string message)
     {
         string[] parts = message.Split(";");
 
@@ -116,11 +107,6 @@ public class GameManager : Singleton<GameManager>
 
     private void UpdatePlayerScores(string message)
     {
-        //for (const auto&i : players){
-        //    scoreUpdate = scoreUpdate + std::to_string(i.second.playerId) + ";" + std::to_string(i.second.points) + "!";
-        //}
-        //scoreUpdate += "~";
-
         string[] playersData = message.Split("!");
 
         foreach (string playerData in playersData) {
@@ -155,11 +141,9 @@ public class GameManager : Singleton<GameManager>
     private void RemoveBullet(string message)
     {
         string[] parts = message.Split(";");
-        if (parts.Length > 0 && int.TryParse(parts[0], out int bulletId)) {
-            if(_bullets.TryGetValue(bulletId, out Bullet bullet)) {
-                Destroy(bullet.gameObject);
-                _bullets.Remove(bulletId);
-            }
+        if (parts.Length > 0 && int.TryParse(parts[0], out int bulletId) && _bullets.TryGetValue(bulletId, out Bullet bullet)) {
+            Destroy(bullet.gameObject);
+            _bullets.Remove(bulletId);
         }
     }
 
@@ -263,7 +247,7 @@ public class GameManager : Singleton<GameManager>
         }
 
         float speed = player.PlayerTypeData.BulletSpeed;
-        bullet.Init(position.ToLocal(), rotation, bulletId, speed);
+        bullet.Init(position.ToLocal(), rotation, speed);
     }
 
     private void RemovePlayer(string message)
@@ -282,7 +266,7 @@ public class GameManager : Singleton<GameManager>
         _players.Remove(playerId);
     }
 
-    private void UdpMessageReceived(string message)
+    private void OnUdpMessageReceived(string message)
     {
         string[] playersData = message.TrimStart('M', ';').Split("!");
 
