@@ -8,7 +8,7 @@ public class LeaderboardUI : UIWindow
     [SerializeField] private Transform _leaderboardListParent;
     [SerializeField] private Color _normalColor;
     [SerializeField] private Color _localPlayerColor;
-    
+
     private List<Transform> _children;
 
     private void Start()
@@ -20,12 +20,24 @@ public class LeaderboardUI : UIWindow
             child.gameObject.SetActive(false);
         }
 
-        GameManager.Instance.PlayerScoresUpdated += UpdateLeaderboard;
         UpdateLeaderboard();
+    }
+
+    private void OnEnable()
+    {
+        GameManager.PlayerScoresUpdated += UpdateLeaderboard;
+    }
+
+    private void OnDisable()
+    {
+        GameManager.PlayerScoresUpdated -= UpdateLeaderboard;
     }
 
     private void UpdateLeaderboard()
     {
+        if (GameManager.Instance == null)
+            return;
+
         List<Player> players = GameManager.Instance.Players.Values.ToList();
 
         players.Sort((p1, p2) => p2.Score.CompareTo(p1.Score));

@@ -9,9 +9,9 @@ public class SceneLoader : MonoBehaviour
     private const string AudioSceneName = "AudioScene";
 
     private static bool _isGameLoadingOrLoaded;
-    
-    public static event Action GameSceneLoaded; 
-    
+
+    public static event Action GameSceneLoaded;
+
 #if UNITY_EDITOR
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
     private static void ResetStatics()
@@ -31,13 +31,13 @@ public class SceneLoader : MonoBehaviour
         LoadScenes();
     }
 #endif
-    
+
     private static void LoadScenes()
     {
 #if UNITY_EDITOR
         if (SceneManager.GetSceneByName(GameSceneName).isLoaded)
             SceneManager.UnloadSceneAsync(GameSceneName);
-        
+
         if (!SceneManager.GetSceneByName(UISceneName).isLoaded)
             SceneManager.LoadSceneAsync(UISceneName, LoadSceneMode.Additive).completed += _ => OpenMainMenu();
         else
@@ -69,7 +69,7 @@ public class SceneLoader : MonoBehaviour
 
     public static void ResetLevel()
     {
-        SceneManager.UnloadSceneAsync(GameSceneName).completed += 
+        SceneManager.UnloadSceneAsync(GameSceneName).completed +=
             _ => SceneManager.LoadSceneAsync(GameSceneName, LoadSceneMode.Additive);
     }
 
@@ -81,7 +81,8 @@ public class SceneLoader : MonoBehaviour
             SceneManager.UnloadSceneAsync(GameSceneName);
             _isGameLoadingOrLoaded = false;
         }
-        UIManager.Instance.GameplayUI.Close();
-        UIManager.Instance.MainMenuUI.Open();
+
+        UIManager.Instance?.GameplayUI?.Close();
+        UIManager.Instance?.MainMenuUI?.Open();
     }
 }

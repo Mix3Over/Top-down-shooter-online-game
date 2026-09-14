@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &1522855250420685042
+--- !u!1001 &8063082614601808965
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -88,9 +88,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8680034665290764715, guid: b139e59c9cc98804abcfc39816507b0e, type: 3}
+      propertyPath: m_Color.b
+      value: 0.22
+      objectReference: {fileID: 0}
+    - target: {fileID: 8680034665290764715, guid: b139e59c9cc98804abcfc39816507b0e, type: 3}
+      propertyPath: m_Color.g
+      value: 0.22
+      objectReference: {fileID: 0}
+    - target: {fileID: 8680034665290764715, guid: b139e59c9cc98804abcfc39816507b0e, type: 3}
+      propertyPath: m_Color.r
+      value: 0.22
+      objectReference: {fileID: 0}
     - target: {fileID: 8985183784451785514, guid: b139e59c9cc98804abcfc39816507b0e, type: 3}
       propertyPath: m_Name
-      value: Background
+      value: DarkBackground
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

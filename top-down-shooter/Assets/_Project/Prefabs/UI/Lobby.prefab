@@ -205,7 +205,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 221286236269317324, guid: 1c8a640f64c70f844a586ac5dbb4b79e, type: 3}
       propertyPath: m_text
-      value: "\u200B"
+      value: "172.28.165.206\u200B"
       objectReference: {fileID: 0}
     - target: {fileID: 557161628515795994, guid: 1c8a640f64c70f844a586ac5dbb4b79e, type: 3}
       propertyPath: m_Name
@@ -291,9 +291,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1697252855772416885, guid: 1c8a640f64c70f844a586ac5dbb4b79e, type: 3}
+      propertyPath: m_Text
+      value: 172.28.165.206
+      objectReference: {fileID: 0}
     - target: {fileID: 5543455279213362818, guid: 1c8a640f64c70f844a586ac5dbb4b79e, type: 3}
       propertyPath: m_text
       value: IP address
+      objectReference: {fileID: 0}
+    - target: {fileID: 5543455279213362818, guid: 1c8a640f64c70f844a586ac5dbb4b79e, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -326,7 +334,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 221286236269317324, guid: 1c8a640f64c70f844a586ac5dbb4b79e, type: 3}
       propertyPath: m_text
-      value: "\u200B"
+      value: "1234\u200B"
       objectReference: {fileID: 0}
     - target: {fileID: 557161628515795994, guid: 1c8a640f64c70f844a586ac5dbb4b79e, type: 3}
       propertyPath: m_Name
@@ -412,9 +420,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1697252855772416885, guid: 1c8a640f64c70f844a586ac5dbb4b79e, type: 3}
+      propertyPath: m_Text
+      value: 1234
+      objectReference: {fileID: 0}
     - target: {fileID: 5543455279213362818, guid: 1c8a640f64c70f844a586ac5dbb4b79e, type: 3}
       propertyPath: m_text
       value: Port
+      objectReference: {fileID: 0}
+    - target: {fileID: 5543455279213362818, guid: 1c8a640f64c70f844a586ac5dbb4b79e, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class GameManager : Singleton<GameManager>
 {
-    public event Action PlayerScoresUpdated;
+    public static event Action PlayerScoresUpdated;
 
     [SerializeField] private List<PlayerTypeData> _playerTypes;
     [SerializeField] private CinemachineCamera _playerCamera;
@@ -46,12 +46,12 @@ public class GameManager : Singleton<GameManager>
 
         foreach (Bullet bullet in _bullets.Values.Where(bullet => bullet != null))
             Destroy(bullet.gameObject);
-        
+
         _players.Clear();
         _bullets.Clear();
         LocalPlayer = null;
 
-        if(UIManager.Instance != null && UIManager.Instance.LeaderboardUI) 
+        if(UIManager.Instance != null && UIManager.Instance.LeaderboardUI)
             UIManager.Instance.LeaderboardUI.Close();
     }
 
@@ -186,7 +186,7 @@ public class GameManager : Singleton<GameManager>
         player.SetHealth(health);
 
         if (isAliveInt != 0) return;
-        
+
         PlayerDeath(playerId);
     }
 
