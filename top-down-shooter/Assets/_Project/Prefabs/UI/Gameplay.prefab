@@ -51,7 +51,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameplayUI
   <LeaderboardUI>k__BackingField: {fileID: 4247562560804247795}
   <PlayerTypeSelectionUI>k__BackingField: {fileID: 5719077312965410297}
-  _disconnectButton: {fileID: 0}
+  _disconnectButton: {fileID: 1797413428875702461}
 --- !u!1 &5040078926982006918
 GameObject:
   m_ObjectHideFlags: 0
@@ -197,6 +197,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 92b36cdaeee53e74ea73c0995f8032d9, type: 3}
+--- !u!114 &1797413428875702461 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4594667334753764261, guid: 92b36cdaeee53e74ea73c0995f8032d9, type: 3}
+  m_PrefabInstance: {fileID: 2824381924430181144}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &5870952761478686280 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8524161854522053968, guid: 92b36cdaeee53e74ea73c0995f8032d9, type: 3}

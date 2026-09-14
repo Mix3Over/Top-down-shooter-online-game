@@ -9,36 +9,35 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        _player = GetComponent<Player>();   
+        _player = GetComponent<Player>();
+    }
+
+    private void OnEnable()
+    {
+        InputManager.PlayerMoved += Move;
+        InputManager.ShootingPerformed += Shoot;
+        InputManager.MousePositionChanged += UpdateLookDirection;
+    }
+
+    private void OnDisable()
+    {
+        InputManager.PlayerMoved -= Move;
+        InputManager.ShootingPerformed -= Shoot;
+        InputManager.MousePositionChanged -= UpdateLookDirection;
     }
 
     private void Update()
     {
-        if (!_player.IsInitialized)
-            return;
-
-        Move();
-
-        if (Input.GetMouseButtonDown(0))
-            _isShooting = true;
-        
-        if (Input.GetMouseButtonUp(0))
-            _isShooting = false;
-
-        if(_isShooting)
-            Shoot();
-
         SendTransformData();
     }
 
-    private void Move()
+    private void Move(Vector2 move)
     {
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
-        Vector3 movementVector3 = new(horizontal, vertical);
-        movementVector3.z = 0f;
+        Vector3 movementVector3 = move;
+
         if (movementVector3.magnitude > 1)
             movementVector3.Normalize();
+
         Vector3 position = transform.position + movementVector3 * (_player.PlayerTypeData.MovementSpeed * Time.deltaTime);
         if(position.x > 30f)
             position.x = 30f;
@@ -50,10 +49,13 @@ public class PlayerController : MonoBehaviour
             position.y = -20f;
 
         transform.position = position;
+    }
 
-        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+    private void UpdateLookDirection(Vector2 mousePosition)
+    {
+        Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(mousePosition);
 
-        Vector2 direction = mousePosition - transform.position;
+        Vector2 direction = mouseWorldPosition - transform.position;
         _player.Visual.transform.rotation = Quaternion.FromToRotation(Vector3.right, direction);
     }
 
