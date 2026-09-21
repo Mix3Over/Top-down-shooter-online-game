@@ -16,7 +16,12 @@
 #include <iostream>
 #include <fcntl.h>
 
-int ticksPerSecond = 32;
+#include "playerData.hpp"
+#include "bulletData.hpp"
+
+const int bulletLifetime = 128;
+const int ticksPerSecond = 32;
+
 int tickCount = 0;
 
 int tcpPort;
@@ -27,42 +32,6 @@ int nextBulletID = 0;
 int tcpFd;
 int udpFd;  
 int epollDesc;
-
-class PlayerData {      
-  public:
-    int playerId;
-    int tcpFd;
-    std::string name;
-
-    bool isInitialized;
-    bool isAlive;
-    int health;
-
-    int positionX;
-    int positionY;
-    int rotation;
-    int type;
-    int damage;
-    int bulletSpeed;
-    int points;
-
-    sockaddr_in playerAddr;
-    std::string inputBuffer;
-};
-
-class BulletData {
-  public:
-    int bulletId;
-    int ownerPlayerId;
-
-    int positionX;
-    int positionY;
-    int direction;
-    int speed;
-    int lifetime;
-    int damage;
-};
-
 
 std::map<int, PlayerData> players;
 std::map<int, BulletData> bullets;
@@ -120,16 +89,7 @@ void handleNewClient(epoll_event ee){
     // add client to all clients set
     int playerId = nextPlayerID++;
 
-    PlayerData playerData {};
-    playerData.playerId = playerId;
-    playerData.tcpFd = clientFd;
-    playerData.playerAddr.sin_addr = ((sockaddr_in *)&clientAddr)->sin_addr;
-    playerData.playerAddr.sin_family = AF_INET;
-    playerData.isAlive = false;
-    playerData.isInitialized = false;
-    playerData.health = 0;
-    playerData.rotation = 0;
-    players[playerId] = playerData;
+    players[playerId] = PlayerData(playerId, clientFd, clientAddr);
 
     // tell who has connected
     char host[NI_MAXHOST], port[NI_MAXSERV];
@@ -201,7 +161,6 @@ void handleMsgInit(int playerId, int clientFd, const char* del) {
 }
 
 void handleMsgShoot(int playerId, const char* del) {
-    // std::cout << "Player " << playerId << " shooting" << std::endl;
     char *t = strtok(nullptr, del);
     int positionX = atoi(t);
     t = strtok(nullptr, del);
@@ -209,23 +168,21 @@ void handleMsgShoot(int playerId, const char* del) {
     t = strtok(nullptr, del);
     int rotation = atoi(t);
 
-    if(!players[playerId].isAlive){
-        // std::cout << "Player " << playerId << " is dead, cannot shoot" << std::endl;
+    if(!players[playerId].isAlive)
         return;
-    }
-
-    BulletData bulletData;
-    bulletData.bulletId = nextBulletID++;
-    bulletData.ownerPlayerId = playerId;
-    bulletData.positionX = positionX;
-    bulletData.positionY = positionY;
-    bulletData.direction = rotation;
-    bulletData.speed = players[playerId].bulletSpeed;
-    bulletData.lifetime = 128;
-    bulletData.damage = players[playerId].damage;
+    
+    BulletData bulletData {
+        .bulletId = nextBulletID++,
+        .ownerPlayerId = playerId,
+        .positionX = positionX,
+        .positionY = positionY,
+        .direction = rotation,
+        .speed = players[playerId].bulletSpeed,
+        .lifetime = bulletLifetime,
+        .damage = players[playerId].damage
+    };
 
     bullets[bulletData.bulletId] = bulletData;
-    // std::cout << "Player " << playerId << " shooted" << std::endl;
     
     std::string shootMessage = "S;" + std::to_string(bulletData.bulletId) + ";" + std::to_string(bulletData.ownerPlayerId) + ";" + std::to_string(bulletData.positionX) + ";" + std::to_string(bulletData.positionY) + ";" + std::to_string(bulletData.direction) + "~";
     tcpSendMessageToPlayers(shootMessage.c_str(), shootMessage.size());
@@ -341,8 +298,8 @@ void bulletsUpdate(int deltaTime) {
         bool bulletRemoved = false;
 
         // Aktualizacja pozycji
-        bulletData.positionX += 100 * bulletData.speed * cos(bulletData.direction * M_PI / 180.0)*deltaTime/1000;
-        bulletData.positionY += 100 *bulletData.speed * sin(bulletData.direction * M_PI / 180.0)*deltaTime/1000;
+        bulletData.positionX += 100 * bulletData.speed * cos(bulletData.direction * M_PI / 180.0) * deltaTime / 1000;
+        bulletData.positionY += 100 * bulletData.speed * sin(bulletData.direction * M_PI / 180.0) * deltaTime / 1000;
 
         // Sprawdzanie kolizji z graczami
         for (const auto& playerEntry : players) {
@@ -372,24 +329,20 @@ void bulletsUpdate(int deltaTime) {
                     players[player.playerId].health = 0;
                 }
 
-             
                 std::string hitMessage = "H;" + std::to_string(player.playerId) + ";" + 
                                          std::to_string(bulletData.bulletId) + ";" + 
                                          std::to_string(players[player.playerId].health) + ";" + 
                                          std::to_string(players[player.playerId].isAlive) + "~";
                 tcpSendMessageToPlayers(hitMessage.c_str(), hitMessage.size());
 
-               
                 it = bullets.erase(it); 
                 bulletRemoved = true;
                 break; 
             }
         }
-
         
-        if (bulletRemoved) {
+        if (bulletRemoved) 
             continue;
-        }
 
         bulletData.lifetime -= 1;
 
@@ -504,8 +457,8 @@ int main(int argc, char **argv) {
     auto lastTickTime = std::chrono::high_resolution_clock::now();
 
     while (true) {
-        auto dur = std::chrono::high_resolution_clock::now() - lastTickTime;
-        auto deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(dur).count();
+        auto duration = std::chrono::high_resolution_clock::now() - lastTickTime;
+        auto deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 
         if(deltaTime >= cooldown){
             tickUpdate(deltaTime);
