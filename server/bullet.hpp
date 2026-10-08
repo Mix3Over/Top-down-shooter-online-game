@@ -1,6 +1,6 @@
 #pragma once
 
-class BulletData {
+class Bullet {
   public:
     int bulletId;
     int ownerPlayerId;
