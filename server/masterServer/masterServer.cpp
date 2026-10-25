@@ -3,11 +3,10 @@
 
 #include <vector>
 #include <unordered_map>
-#include <unordered_set>
 
 #include "player.hpp"
-#include "utils.hpp"
-#include "connectionService.hpp"
+#include "common/utils.hpp"
+#include "common/connectionService.hpp"
 
 int heartbeatInterval = 1000;
 int nextPlayerID = 0;
@@ -69,9 +68,9 @@ void onPlayerDisconnected(const Connection& connection) {
     idToPlayer.erase(player.id);
 
     printf("Client Id: %d, tcpFd: %d disconnected\n", player.id, player.connection.tcpFd);
-    std::string discconnectMessage = "D;" + std::to_string(player.id) + "~";
+    std::string disconnectMessage = "D;" + std::to_string(player.id) + "~";
 
-    connectionService.sendTcpMessageToAll(discconnectMessage);
+    connectionService.sendTcpMessageToAll(disconnectMessage);
 }
 
 void sendHeartbeat() {
@@ -90,7 +89,7 @@ int main(int argc, char **argv) {
     if (tcpPort > 65535 || tcpPort < 1024 || udpPort > 65535 || udpPort < 1024)
         error(1, 0, "Ports must be in range 1024-65535");
 
-    srand(time(0));
+    srand(time(nullptr));
 
     // set up ctrl+c handler for a graceful exit
     signal(SIGINT, ctrl_c);

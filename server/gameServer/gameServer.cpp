@@ -6,10 +6,11 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "common/utils.hpp"
+#include "common/connectionService.hpp"
+
 #include "player.hpp"
 #include "bullet.hpp"
-#include "utils.hpp"
-#include "connectionService.hpp"
 
 const int bulletLifetime = 128;
 const int ticksPerSecond = 32;
@@ -285,7 +286,7 @@ void tickUpdate(int deltaTime){
 void ctrl_c(int);
 
 int main(int argc, char **argv) {
-    if (argc != 3) 
+    if (argc != 2) 
         error(1, 0, "Usage: %s <tcp-port>", argv[0]);
 
     int tcpPort = atoi(argv[1]);
