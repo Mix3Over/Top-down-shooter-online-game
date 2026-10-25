@@ -15,20 +15,20 @@ ConnectionService::ConnectionService(
     void(*onNewTcpMessage)(const Connection& connection, const std::string& message),
     void(*onPlayerDisconnected)(const Connection& connection),
     
-    const char *udpPort, 
+    bool createUdpSocket,
     void(*onNewUdpMessage)(char* messageBuffer)
 ): onNewConnection(onNewConnection), onNewTcpMessage(onNewTcpMessage), onPlayerDisconnected(onPlayerDisconnected), onNewUdpMessage(onNewUdpMessage) 
 {
 
-    tcpFd = getaddrinfo_socket_bind_listen(SOCK_STREAM, tcpPort);
+    int tcpPortResult;
+    tcpFd = getaddrinfo_socket_bind_listen(SOCK_STREAM, SPECIFIED_PORT, tcpPort, tcpPortResult);
     setNonBlocking(tcpFd);
     int flag = 1;
     setsockopt(tcpFd, IPPROTO_TCP, O_NDELAY, (char *)&flag, sizeof(int));
-    udpFd = getaddrinfo_socket_bind_listen(SOCK_DGRAM, udpPort);
+    udpFd = getaddrinfo_socket_bind_listen(SOCK_DGRAM, RANDOM_PORT, nullptr, udpPort);
     setNonBlocking(udpFd);
 
-    //TODO: poprawić
-    this->udpPort = atoi(udpPort);
+    printf("TCP: %d, UDP: %d\n", tcpPortResult, udpPort);
 
     epollDesc = epoll_create1(0);
     std::cout << "Epoll created, desc: " << epollDesc << std::endl;
@@ -129,8 +129,7 @@ void ConnectionService::handleTcpMessage(epoll_event& ee) {
     }
 }
 
-int ConnectionService::getaddrinfo_socket_bind_listen(int sockType, const char *port) {
-
+int ConnectionService::getaddrinfo_socket_bind_listen(int sockType, int portOption, const char *port, int& resultPort) {
     // resolve port to a 'sockaddr*' for a TCP server
     addrinfo *res, hints{};
     hints.ai_flags = AI_PASSIVE;

@@ -5,8 +5,8 @@
 #include <sys/epoll.h>
 #include <unordered_map>
 
-#define NO_UDP_PORT -1
-#define RANDOM_UDP_PORT -2
+#define RANDOM_PORT 0
+#define SPECIFIED_PORT 1
 
 class Connection{
     public:
@@ -40,7 +40,7 @@ class ConnectionService {
             void(*onNewTcpMessage)(const Connection& connection, const std::string& message),
             void(*onPlayerDisconnected)(const Connection& connection),
             
-            const char *udpPort, 
+            bool createUdpSocket, 
             void(*onNewUdpMessage)(char* messageBuffer)
         );
 
@@ -58,10 +58,10 @@ class ConnectionService {
 
     private:
         
-        int tcpFd;
-        int udpFd;
-        int udpPort;
-        int epollDesc;
+        int tcpFd = -1;
+        int udpFd = -1;
+        int udpPort = -1;
+        int epollDesc = -1;
         epoll_event ee;
         std::unordered_map<int, Connection> fdToConnection;
 
@@ -71,7 +71,7 @@ class ConnectionService {
     
         void(*onNewUdpMessage)(char* messageBuffer);
 
-        int getaddrinfo_socket_bind_listen(int sockType, const char *port);
+        int getaddrinfo_socket_bind_listen(int sockType, int portOption, const char *port, int& resultPort);
         void setNonBlocking(int sock);
         void handleNewClient(epoll_event& ee);
         void handleTcpMessage(epoll_event& ee);

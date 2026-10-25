@@ -2,8 +2,8 @@
 
 class Bullet {
   public:
-    int bulletId;
-    int ownerPlayerId;
+    int id;
+    int playerId;
 
     int positionX;
     int positionY;
