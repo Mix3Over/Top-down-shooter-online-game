@@ -98,6 +98,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: LobbyUI
       objectReference: {fileID: 0}
+    - target: {fileID: 606730076984127166, guid: 37f27b9f44540ff4baf6752880444e26, type: 3}
+      propertyPath: m_text
+      value: "192.168.238.151\u200B"
+      objectReference: {fileID: 0}
+    - target: {fileID: 2086425672741169415, guid: 37f27b9f44540ff4baf6752880444e26, type: 3}
+      propertyPath: m_Text
+      value: 192.168.238.151
+      objectReference: {fileID: 0}
     - target: {fileID: 7950460512292265314, guid: 37f27b9f44540ff4baf6752880444e26, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

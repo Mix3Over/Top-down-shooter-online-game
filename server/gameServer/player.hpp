@@ -23,11 +23,11 @@ class Player {
     int positionY = 0;
     int rotation = 0;
 
-    Connection connection;
+    Connection* connection;
 
     Player() = default;
 
-    Player(int id, Connection connection);
+    Player(int id, Connection& connection);
 
     void Initialize(int udpPort, std::string name, int type, int damage, int bulletSpeed, int hp);
 };

@@ -1,6 +1,7 @@
 #include <sys/epoll.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include <iostream>
 
@@ -31,7 +32,7 @@ ConnectionService::ConnectionService(
     epollDesc = epoll_create1(0);
     std::cout << "Epoll created, desc: " << epollDesc << std::endl;
 
-    ee.events = POLL_IN;
+    ee.events = EPOLLIN;
     ee.data.fd = STDOUT_FILENO;
     epoll_ctl(epollDesc, EPOLL_CTL_ADD, STDIN_FILENO, &ee);
     ee.data.u32 = -1;
@@ -73,7 +74,6 @@ void ConnectionService::handleNewClient(epoll_event& ee){
     int flag = 1;
     setsockopt(clientFd, IPPROTO_TCP, O_NDELAY, (char *)&flag, sizeof(int));
 
-
     // tell who has connected
     char host[NI_MAXHOST], port[NI_MAXSERV];
     getnameinfo((sockaddr *)&clientAddr, clientAddrSize, host, NI_MAXHOST, port, NI_MAXSERV, 0);
@@ -87,9 +87,10 @@ void ConnectionService::handleNewClient(epoll_event& ee){
         .udpAddress = *(sockaddr_in*)&clientAddr
     };
 
-    if(onNewConnection != nullptr){
-        onNewConnection(connection);
-    }
+    fdToConnection[clientFd] = connection;
+
+    if(onNewConnection != nullptr)
+        onNewConnection(fdToConnection[clientFd]);
 }
 
 void ConnectionService::handleTcpMessage(epoll_event& ee) {
@@ -100,7 +101,7 @@ void ConnectionService::handleTcpMessage(epoll_event& ee) {
         return;
     }
 
-    Connection connection = fdToConnection[connectionFd];
+    Connection& connection = fdToConnection[connectionFd];
 
     char buffer[255];
     int count = read(connection.tcpFd, buffer, 255);
@@ -128,12 +129,17 @@ void ConnectionService::handleTcpMessage(epoll_event& ee) {
 }
 
 int ConnectionService::getaddrinfo_socket_bind_listen(int sockType, int portOption, const char *port, int& resultPort) {
-    // resolve port to a 'sockaddr*' for a TCP server
     addrinfo *res, hints{};
     hints.ai_flags = AI_PASSIVE;
     // hints.ai_socktype = SOCK_STREAM;
     hints.ai_socktype = sockType;
-    int rv = getaddrinfo(nullptr, port, &hints, &res);
+
+    int rv;
+
+    if(portOption == RANDOM_PORT)
+        rv = getaddrinfo(nullptr, "0", &hints, &res);
+    else
+        rv = getaddrinfo(nullptr, port, &hints, &res);
 
     if (rv) 
         error(1, 0, "getaddrinfo: %s", gai_strerror(rv));
@@ -141,16 +147,6 @@ int ConnectionService::getaddrinfo_socket_bind_listen(int sockType, int portOpti
     // create socket
     int sockFd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (sockFd == -1) error(1, errno, "socket failed");
-
-    char result_host[NI_MAXHOST], result_port[NI_MAXSERV];
-    getnameinfo(res->ai_addr, res->ai_addrlen, result_host, NI_MAXHOST, result_port, NI_MAXSERV, NI_NUMERICSERV);
-
-    if(atoi(port) != atoi(result_port)){
-        printf("Failed creating socket at port: %s\n", port);
-        exit(1);
-    }
-
-    printf("Created socket: %s:%s (fd: %d)\n", result_host, result_port, sockFd);
 
     // try to set REUSEADDR
     const int one = 1;
@@ -165,6 +161,28 @@ int ConnectionService::getaddrinfo_socket_bind_listen(int sockType, int portOpti
         if (listen(sockFd, 1))
             error(1, errno, "listen failed");
     }
+
+    sockaddr_storage bound{};
+    socklen_t boundLen = sizeof(bound);
+    if (getsockname(sockFd, (sockaddr*)&bound, &boundLen))
+        error(1, errno, "getsockname failed");
+
+    char result_host[NI_MAXHOST], result_port[NI_MAXSERV];
+    rv = getnameinfo((sockaddr*)&bound, boundLen,
+                     result_host, NI_MAXHOST,
+                     result_port, NI_MAXSERV,
+                     NI_NUMERICHOST | NI_NUMERICSERV);
+    if (rv)
+        error(1, 0, "getnameinfo: %s", gai_strerror(rv));
+
+    if(portOption == SPECIFIED_PORT && atoi(port) != atoi(result_port)){
+        printf("Failed creating socket at port: %s\n", port);
+        exit(1);
+    }
+
+    resultPort = atoi(result_port);
+
+    printf("Created socket: %s:%s (fd: %d)\n", result_host, result_port, sockFd);
     
     freeaddrinfo(res);
     return sockFd;

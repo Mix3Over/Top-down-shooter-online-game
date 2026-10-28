@@ -4,11 +4,11 @@
 #include "player.hpp"
 #include "common/utils.hpp"
 
-Player::Player(int id, Connection connection): id(id), connection(connection) {}
+Player::Player(int id, Connection& connection): id(id), connection(&connection) {}
 
 void Player::Initialize(int udpPort, std::string name, int type, int damage, int bulletSpeed, int hp) {
-    connection.udpAddress.sin_port = htons(udpPort);
-    connection.isUdpInitialized = true;
+    connection->udpAddress.sin_port = htons(udpPort);
+    connection->isUdpInitialized = true;
 
     this->name = name;
     this->type = type;

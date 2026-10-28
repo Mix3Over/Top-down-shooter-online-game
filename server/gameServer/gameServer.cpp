@@ -4,7 +4,6 @@
 
 #include <vector>
 #include <unordered_map>
-#include <unordered_set>
 
 #include "common/utils.hpp"
 #include "common/connectionService.hpp"
@@ -21,29 +20,30 @@ int nextPlayerID = 0;
 int nextBulletID = 0;
 
 std::unordered_map<int, Bullet> idToBullet;
-std::unordered_map<int, Player> idToPlayer;
-std::unordered_map<Connection, Player> connectionToPlayerMap;
+std::unordered_map<int, Player*> idToPlayer;
+std::unordered_map<const Connection*, Player> connectionToPlayerMap;
 
 ConnectionService connectionService;
 
-void handleMsgInit(Player player, const char* del);
-void handleMsgShoot(Player player, const char* del);
+void handleMsgInit(Player& player, const char* del);
+void handleMsgShoot(Player& player, const char* del);
 
 void onNewConnection(Connection& connection) {
-    Player newPlayer = Player(nextPlayerID++, connection);
-    connectionToPlayerMap[connection] = newPlayer;
+    connectionToPlayerMap[&connection] = Player(nextPlayerID++, connection);
+    Player& newPlayer = connectionToPlayerMap[&connection];
+    idToPlayer[newPlayer.id] = &newPlayer;
 
     std::string s = std::to_string(connectionService.getUdpPort()) + ";" + std::to_string(newPlayer.id) + "~";
-    connectionService.sendTcpMessageTo(newPlayer.connection, s);
+    connectionService.sendTcpMessageTo(*newPlayer.connection, s);
 }
 
 void onNewTcpMessage(const Connection& connection, const std::string& message) {
-    if(!connectionToPlayerMap.contains(connection)) {
+    if(!connectionToPlayerMap.contains(&connection)) {
         printf("Received message from unknown connection\n");
         return;
     }
 
-    Player& player = connectionToPlayerMap[connection];
+    Player& player = connectionToPlayerMap[&connection];
     
     std::vector<char> msgBuf(message.begin(), message.end());
     msgBuf.push_back('\0');
@@ -63,12 +63,12 @@ void onNewTcpMessage(const Connection& connection, const std::string& message) {
             handleMsgShoot(player, del);
             break;
         default:
+            printf("Unknown message type: %c\n", messageType);
             break;
     }
 }
 
 void onNewUdpMessage(char* messageBuffer) {
-    // printf("Received UDP message: %s\n", buffer);
     const char *del = ";";
     int playerId, positionX, positionY, rotation;
 
@@ -93,30 +93,28 @@ void onNewUdpMessage(char* messageBuffer) {
         return;        
     rotation = atoi(t);
 
-    //printf("Data: %d, %d, %d, %d\n", playerId, positionX, positionY, rotation);
-    idToPlayer[playerId].positionX = positionX;
-    idToPlayer[playerId].positionY = positionY;
-    idToPlayer[playerId].rotation = rotation;
+    idToPlayer[playerId]->positionX = positionX;
+    idToPlayer[playerId]->positionY = positionY;
+    idToPlayer[playerId]->rotation = rotation;
 }
 
 void onPlayerDisconnected(const Connection& connection) {
-    if(!connectionToPlayerMap.contains(connection)) {
+    if(!connectionToPlayerMap.contains(&connection)) {
         printf("Unknown connection disconnected\n");
         return;
     }
 
-    connectionToPlayerMap.erase(connection);
+    Player* player = &connectionToPlayerMap[&connection];
+    idToPlayer.erase(player->id);
 
-    Player player = connectionToPlayerMap[connection];
-    idToPlayer.erase(player.id);
+    printf("Client Id: %d, tcpFd: %d disconnected\n", player->id, player->connection->tcpFd);
+    std::string discconnectMessage = "D;" + std::to_string(player->id) + "~";
 
-    printf("Client Id: %d, tcpFd: %d disconnected\n", player.id, player.connection.tcpFd);
-    std::string discconnectMessage = "D;" + std::to_string(player.id) + "~";
-
+    connectionToPlayerMap.erase(&connection);
     connectionService.sendTcpMessageToAll(discconnectMessage);
 }
 
-void handleMsgInit(Player player, const char* del) {
+void handleMsgInit(Player& player, const char* del) {
     char *t = strtok(nullptr, del);
     int playerUdpPort = atoi(t);
     t = strtok(nullptr, del);
@@ -131,25 +129,28 @@ void handleMsgInit(Player player, const char* del) {
     int hp = atoi(t);
 
     player.Initialize(playerUdpPort, name, type, damage, bulletSpeed, hp);
+    printf("[GameServer] Player initialized: %d", player.isAlive);
 
     std::string s = "I;" + std::to_string(player.positionX) + ";" + std::to_string(player.positionY) + "~";
-    connectionService.sendTcpMessageTo(player.connection, s);
+    connectionService.sendTcpMessageTo(*player.connection, s);
         
     std::string map = "M;";
     for(const auto& i : idToPlayer){
-        if(!i.second.isAlive)
+        if(!i.second->isAlive)
             continue;
-        map = map + std::to_string(i.second.id) + ";" + i.second.name + ";" + std::to_string(i.second.type) + ";" + std::to_string(i.second.positionX) + ";" + std::to_string(i.second.positionY) + ";" + std::to_string(i.second.rotation) + ";" + std::to_string(i.second.health) + "!";
+        map = map + std::to_string(i.second->id) + ";" + i.second->name + ";" + std::to_string(i.second->type) + ";" + std::to_string(i.second->positionX) + ";" + std::to_string(i.second->positionY) + ";" + std::to_string(i.second->rotation) + ";" + std::to_string(i.second->health) + "!";
     }
     map += "~";
 
-    connectionService.sendTcpMessageTo(player.connection, map);
+    connectionService.sendTcpMessageTo(*player.connection, map);
 
     std::string newPlayerMessage = "C;" + std::to_string(player.id) + ";" + player.name + ";" + std::to_string(player.type) + ";" + std::to_string(player.positionX) + ";" + std::to_string(player.positionY) + ";" + std::to_string(player.rotation) + "~";
     connectionService.sendTcpMessageToAll(newPlayerMessage);
 }
 
-void handleMsgShoot(Player player, const char* del) {
+void handleMsgShoot(Player& player, const char* del) {
+    printf("[GameServer] Handling shoot message %d\n", player.isAlive);
+
     char *t = strtok(nullptr, del);
     int positionX = atoi(t);
     t = strtok(nullptr, del);
@@ -172,6 +173,8 @@ void handleMsgShoot(Player player, const char* del) {
     };
 
     idToBullet[bulletData.id] = bulletData;
+
+    printf("Player %d shot bullet %d at (%d, %d) with rotation %d\n", player.id, bulletData.id, positionX, positionY, rotation);
     
     std::string shootMessage = "S;" + std::to_string(bulletData.id) + ";" + std::to_string(bulletData.playerId) + ";" + std::to_string(bulletData.positionX) + ";" + std::to_string(bulletData.positionY) + ";" + std::to_string(bulletData.direction) + "~";
     connectionService.sendTcpMessageToAll(shootMessage);
@@ -191,35 +194,35 @@ void bulletsUpdate(int deltaTime) {
         for (const auto& playerEntry : idToPlayer) {
             const auto& player = playerEntry.second;
 
-            if (player.id == bulletData.playerId || !player.isAlive)
+            if (player->id == bulletData.playerId || !player->isAlive)
                 continue; 
 
-            long dx = bulletData.positionX - player.positionX;
-            long dy = bulletData.positionY - player.positionY;
+            long dx = bulletData.positionX - player->positionX;
+            long dy = bulletData.positionY - player->positionY;
             long distanceSquared = dx * dx + dy * dy;
             long collisionDistance = 65; 
 
             if (distanceSquared <= collisionDistance * collisionDistance) {
                 
-                idToPlayer[player.id].health -= bulletData.damage;
+                idToPlayer[player->id]->health -= bulletData.damage;
                 
                 printf("Player %d hit by bullet %d. Health: %d\n",
-                       player.id, bulletData.id, idToPlayer[player.id].health);
+                       player->id, bulletData.id, idToPlayer[player->id]->health);
 
                 
-                if (idToPlayer[player.id].health <= 0) {
-                    printf("Player %d has died.\n", player.id);
+                if (idToPlayer[player->id]->health <= 0) {
+                    printf("Player %d has died.\n", player->id);
 
-                    idToPlayer[player.id].isAlive = false;
-                    idToPlayer[bulletData.playerId].points += 100;
-                    idToPlayer[player.id].health = 0;
+                    idToPlayer[player->id]->isAlive = false;
+                    idToPlayer[bulletData.playerId]->points += 100;
+                    idToPlayer[player->id]->health = 0;
                 }
 
                 std::string hitMessage = 
-                    "H;" + std::to_string(player.id) + ";" + 
+                    "H;" + std::to_string(player->id) + ";" + 
                     std::to_string(bulletData.id) + ";" + 
-                    std::to_string(idToPlayer[player.id].health) + ";" + 
-                    std::to_string(idToPlayer[player.id].isAlive) + "~";
+                    std::to_string(idToPlayer[player->id]->health) + ";" + 
+                    std::to_string(idToPlayer[player->id]->isAlive) + "~";
 
                 connectionService.sendTcpMessageToAll(hitMessage);
 
@@ -248,13 +251,13 @@ void bulletsUpdate(int deltaTime) {
 void updatePlayersScore(){
     std::string scoreUpdate = "P;";
     for(const auto& i : idToPlayer){
-        if(i.second.isAlive)
-            idToPlayer[i.first].points += 1;
+        if(i.second->isAlive)
+            idToPlayer[i.first]->points += 1;
     }
     for(const auto& i : idToPlayer){
-        if(!i.second.isAlive)
+        if(!i.second->isAlive)
             continue;
-        scoreUpdate = scoreUpdate + std::to_string(i.second.id) + ";" + std::to_string(i.second.points) + "!";
+        scoreUpdate = scoreUpdate + std::to_string(i.second->id) + ";" + std::to_string(i.second->points) + "!";
         
     }
     scoreUpdate += "~";
@@ -264,9 +267,9 @@ void updatePlayersScore(){
 void sendUpdateToPlayers(){
     std::string buffer = "M;";
     for(const auto& [id, player] : idToPlayer){
-        if(!player.isAlive)
+        if(!player->isAlive)
             continue;
-        buffer = buffer + std::to_string(player.id) + ";" + std::to_string(player.positionX) + ";" + std::to_string(player.positionY) + ";" + std::to_string(player.rotation) + "!";
+        buffer = buffer + std::to_string(player->id) + ";" + std::to_string(player->positionX) + ";" + std::to_string(player->positionY) + ";" + std::to_string(player->rotation) + "!";
     }
     buffer += "~";
     
