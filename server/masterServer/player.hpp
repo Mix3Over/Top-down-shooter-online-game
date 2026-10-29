@@ -12,11 +12,11 @@ class Player {
 
     bool isInitialized = false;
 
-    Connection connection;
+    Connection* connection;
 
     Player() = default;
 
-    Player(int id, Connection connection);
+    Player(int id, Connection& connection);
 
     void Initialize();
 };

@@ -12,9 +12,12 @@ class Connection{
     public:
         int tcpFd;
         std::string inputBuffer;
+        void(*onNewMessage)(const Connection& connection, const std::string& message);
         
-        sockaddr_in udpAddress{};
+        sockaddr_in udpAddress;
         bool isUdpInitialized = false;
+
+        Connection(int tcpFd, void(*onNewMessage)(const Connection& connection, const std::string& message), sockaddr_in udpAddress);
 
         bool operator==(const Connection& other) const {
             return tcpFd == other.tcpFd;
@@ -55,6 +58,8 @@ class ConnectionService {
         int getUdpPort() const;
 
         void closeAllConnections();
+
+        Connection& createNewConnection(int fd, void(*onNewMessage)(const Connection& connection, const std::string& message), sockaddr_in udpAddress);
 
     private:
         

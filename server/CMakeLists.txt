@@ -11,6 +11,7 @@ add_executable(masterServer
     masterServer/player.cpp
     common/connectionService.cpp
     common/utils.cpp
+    common/messageBuilder.cpp
 )
 
 add_executable(gameServer

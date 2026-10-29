@@ -8,6 +8,11 @@
 #include "connectionService.hpp"
 #include "utils.hpp"
 
+Connection::Connection(
+    int tcpFd,
+    void(*onNewMessage)(const Connection& connection, const std::string& message),
+    sockaddr_in udpAddress): tcpFd(tcpFd), onNewMessage(onNewMessage), udpAddress(udpAddress) {}
+
 ConnectionService::ConnectionService(
     const char *tcpPort,
     void(*onNewConnection)(Connection& connection), 
@@ -24,10 +29,16 @@ ConnectionService::ConnectionService(
     setNonBlocking(tcpFd);
     int flag = 1;
     setsockopt(tcpFd, IPPROTO_TCP, O_NDELAY, (char *)&flag, sizeof(int));
-    udpFd = getaddrinfo_socket_bind_listen(SOCK_DGRAM, RANDOM_PORT, nullptr, udpPort);
-    setNonBlocking(udpFd);
 
-    printf("TCP: %d, UDP: %d\n", tcpPortResult, udpPort);
+    if(createUdpSocket){
+        udpFd = getaddrinfo_socket_bind_listen(SOCK_DGRAM, RANDOM_PORT, nullptr, udpPort);
+        setNonBlocking(udpFd);
+    
+        printf("TCP: %d, UDP: %d\n", tcpPortResult, udpPort);
+    }
+    else{
+        printf("TCP: %d\n", tcpPortResult);
+    }
 
     epollDesc = epoll_create1(0);
     std::cout << "Epoll created, desc: " << epollDesc << std::endl;
@@ -55,7 +66,7 @@ void ConnectionService::listenForEvents(int timeout)
     if(ee.data.u32 == (uint32_t)-2){
         handleUdpMessages();          
         return;
-    } 
+    }
 
     handleTcpMessage(ee);
 }
@@ -79,15 +90,7 @@ void ConnectionService::handleNewClient(epoll_event& ee){
     getnameinfo((sockaddr *)&clientAddr, clientAddrSize, host, NI_MAXHOST, port, NI_MAXSERV, 0);
     printf("New connection from: %s:%s (fd: %d)\n", host, port, clientFd);
 
-    ee.data.fd = clientFd;
-    epoll_ctl(epollDesc, EPOLL_CTL_ADD, clientFd, &ee);
-
-    Connection connection{
-        .tcpFd = clientFd, 
-        .udpAddress = *(sockaddr_in*)&clientAddr
-    };
-
-    fdToConnection[clientFd] = connection;
+    createNewConnection(clientFd, onNewTcpMessage, *(sockaddr_in*)&clientAddr);
 
     if(onNewConnection != nullptr)
         onNewConnection(fdToConnection[clientFd]);
@@ -122,8 +125,8 @@ void ConnectionService::handleTcpMessage(epoll_event& ee) {
         std::string message = connection.inputBuffer.substr(0, pos);
         connection.inputBuffer.erase(0, pos + 1);
 
-        if(onNewTcpMessage != nullptr){
-            onNewTcpMessage(connection, message);
+        if(connection.onNewMessage != nullptr){
+            connection.onNewMessage(connection, message);
         }
     }
 }
@@ -278,4 +281,15 @@ void ConnectionService::handleUdpMessages(){
             onNewUdpMessage(buffer);
         }
     }
+}
+
+Connection& ConnectionService::createNewConnection(int fd, void(*onNewMessage)(const Connection& connection, const std::string& message), sockaddr_in udpAddress){
+    epoll_event ee{};
+    ee.events = EPOLLIN;
+    ee.data.fd = fd;
+    epoll_ctl(epollDesc, EPOLL_CTL_ADD, fd, &ee);
+
+    fdToConnection.try_emplace(fd, fd, onNewTcpMessage, udpAddress);
+
+    return fdToConnection[fd];
 }

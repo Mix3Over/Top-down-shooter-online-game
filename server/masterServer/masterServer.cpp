@@ -7,32 +7,62 @@
 #include "player.hpp"
 #include "common/utils.hpp"
 #include "common/connectionService.hpp"
+#include "common/messageBuilder.hpp"
+
+#include <fcntl.h>
+
+enum class MessageType {
+    Init,
+    Heartbeat,
+    PlayerCount,
+    GameServerInfo,
+    MessageTypeCount // Must be last
+};
 
 int heartbeatInterval = 1000;
 int nextPlayerID = 0;
 
 ConnectionService connectionService;
+const MessageBuilder messageBuilder((int)MessageType::MessageTypeCount);
 
-std::unordered_map<int, Player> idToPlayer;
-std::unordered_map<Connection, Player> connectionToPlayerMap;
+std::unordered_map<int, Player*> idToPlayer;
+std::unordered_map<const Connection*, Player> connectionToPlayerMap;
+
+bool isGameServerActive;
+bool isGameServerActivating;
+int gameServerPort;
+int gameServerFd;
 
 void ctrl_c(int);
+void handleMsgStartGame(Player& player, const char* del);
+
+void sendPlayerCountMessageToAll(){
+    std::string playerCountMessage = messageBuilder.createMessage((int)MessageType::PlayerCount, idToPlayer.size());
+    connectionService.sendTcpMessageToAll(playerCountMessage);
+}
+
+void onNewServerMessage(const Connection& connection, const std::string& message) {
+
+}
 
 void onNewConnection(Connection& connection) {
-    Player newPlayer = Player(nextPlayerID++, connection);
-    connectionToPlayerMap[connection] = newPlayer;
+    connectionToPlayerMap[&connection] = Player(nextPlayerID++, connection);
+    Player& newPlayer = connectionToPlayerMap[&connection];
+    idToPlayer[newPlayer.id] = &newPlayer;
 
-    std::string s = std::to_string(connectionService.getUdpPort()) + ";" + std::to_string(newPlayer.id) + "~";
-    connectionService.sendTcpMessageTo(newPlayer.connection, s);
+    std::string initMessage = messageBuilder.createMessage((int)MessageType::Init, newPlayer.id);
+    connectionService.sendTcpMessageTo(*newPlayer.connection, initMessage);
+
+    sendPlayerCountMessageToAll();
 }
 
 void onNewTcpMessage(const Connection& connection, const std::string& message) {
-    if(!connectionToPlayerMap.contains(connection)) {
+    if(!connectionToPlayerMap.contains(&connection)) {
         printf("Received message from unknown connection\n");
         return;
     }
 
-    Player& player = connectionToPlayerMap[connection];
+    Player& player = connectionToPlayerMap[&connection];
     
     std::vector<char> msgBuf(message.begin(), message.end());
     msgBuf.push_back('\0');
@@ -45,48 +75,43 @@ void onNewTcpMessage(const Connection& connection, const std::string& message) {
     char messageType = t[0];
 
     switch (messageType){
-        case 'I':
-            // handleMsgInit(player, del);
-            break;
-        case 'S':
-            // handleMsgShoot(player, del);
+        case 'G':
+            handleMsgStartGame(player, del);
             break;
         default:
+            printf("Received unknown message\n");
             break;
     }
 }
 
 void onPlayerDisconnected(const Connection& connection) {
-    if(!connectionToPlayerMap.contains(connection)) {
+    if(!connectionToPlayerMap.contains(&connection)) {
         printf("Unknown connection disconnected\n");
         return;
     }
 
-    connectionToPlayerMap.erase(connection);
-
-    Player player = connectionToPlayerMap[connection];
+    Player& player = connectionToPlayerMap[&connection];
+    
     idToPlayer.erase(player.id);
+    printf("Client Id: %d, tcpFd: %d disconnected\n", player.id, player.connection->tcpFd);
 
-    printf("Client Id: %d, tcpFd: %d disconnected\n", player.id, player.connection.tcpFd);
-    std::string disconnectMessage = "D;" + std::to_string(player.id) + "~";
+    connectionToPlayerMap.erase(&connection);
 
-    connectionService.sendTcpMessageToAll(disconnectMessage);
+    sendPlayerCountMessageToAll();
 }
 
 void sendHeartbeat() {
-    // TODO
+    std::string heartbeatMessage = messageBuilder.createMessage((int)MessageType::Heartbeat);
+    connectionService.sendTcpMessageToAll(heartbeatMessage);
 }
 
 int main(int argc, char **argv) {
-    if (argc != 3) 
-        error(1, 0, "Usage: %s <tcp-port> <udp-port>", argv[0]);
+    if (argc != 2) 
+        error(1, 0, "Usage: %s <tcp-port>", argv[0]);
 
     int tcpPort = atoi(argv[1]);
-    int udpPort = atoi(argv[2]);
 
-    if (tcpPort == udpPort)
-        error(1, 0, "TCP and UDP ports must differ");
-    if (tcpPort > 65535 || tcpPort < 1024 || udpPort > 65535 || udpPort < 1024)
+    if (tcpPort > 65535 || tcpPort < 1024)
         error(1, 0, "Ports must be in range 1024-65535");
 
     srand(time(nullptr));
@@ -130,4 +155,34 @@ void ctrl_c(int) {
 
     printf("Closing server\n");
     exit(0);
+}
+
+void startGameServer(){
+    isGameServerActivating = true;
+    
+    int fds[2];
+    if (pipe2(fds, O_CLOEXEC | O_NONBLOCK) != 0) { perror("pipe2"); return; }
+
+    pid_t pid = fork();
+    if (pid < 0) { perror("fork"); close(fds[0]); close(fds[1]); return; }
+
+    if (pid == 0) {
+        dup2(fds[1], STDOUT_FILENO);
+        execl("./slave", "slave", (char*)nullptr);
+        _exit(127);
+    }
+
+    close(fds[1]);
+
+    connectionService.createNewConnection(fds[0], onNewServerMessage, sockaddr_in{});
+    printf("[MasterServer] GameServer starte. PID:%d\n", pid);
+}
+
+void handleMsgStartGame(Player& player, const char* del){
+    if(!isGameServerActive){
+        startGameServer();
+    }
+
+    std::string gameServerInfoMessage = messageBuilder.createMessage((int)MessageType::GameServerInfo, gameServerPort);
+    connectionService.sendTcpMessageTo(*player.connection, gameServerInfoMessage);
 }
