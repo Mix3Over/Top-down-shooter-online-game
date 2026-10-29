@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "player.hpp"
+#include "gameServerData.hpp"
 #include "common/utils.hpp"
 #include "common/connectionService.hpp"
 #include "common/messageBuilder.hpp"
@@ -28,10 +29,13 @@ const MessageBuilder messageBuilder((int)MessageType::MessageTypeCount);
 std::unordered_map<int, Player*> idToPlayer;
 std::unordered_map<const Connection*, Player> connectionToPlayerMap;
 
+// std::unordered_map<const Connection*, GameServerData> connectionToServerMap;
+GameServerData gameServerData;
+
+std::vector<Player*> playersWaitingForServer;
+
 bool isGameServerActive;
 bool isGameServerActivating;
-int gameServerPort;
-int gameServerFd;
 
 void ctrl_c(int);
 void handleMsgStartGame(Player& player, const char* del);
@@ -42,7 +46,22 @@ void sendPlayerCountMessageToAll(){
 }
 
 void onNewServerMessage(const Connection& connection, const std::string& message) {
+    // if(!connectionToServerMap.contains(&connection)) {
+    //     printf("Received onNewServerMessage from unknown connection\n");
+    //     return;
+    // }
+    // GameServerData& gameServer = connectionToServerMap[&connection];
+    int tcpPort = atoi(message.c_str());
 
+    gameServerData.isStarted = true;
+    gameServerData.tcpPort = tcpPort;
+
+    // gameServer.OnServerStarted(tcpPort);
+
+    for(auto player : playersWaitingForServer){
+        std::string serverInfoMessage = messageBuilder.createMessage((int)MessageType::GameServerInfo, tcpPort);
+        connectionService.sendTcpMessageTo(*player->connection, serverInfoMessage);
+    }
 }
 
 void onNewConnection(Connection& connection) {
@@ -158,31 +177,44 @@ void ctrl_c(int) {
 }
 
 void startGameServer(){
-    isGameServerActivating = true;
-    
-    int fds[2];
-    if (pipe2(fds, O_CLOEXEC | O_NONBLOCK) != 0) { perror("pipe2"); return; }
+    int sv[2];
+    if (socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sv) != 0) { 
+        perror("socketpair"); return; 
+    }
+
+    fcntl(sv[0], F_SETFL, fcntl(sv[0], F_GETFL) | O_NONBLOCK);
 
     pid_t pid = fork();
-    if (pid < 0) { perror("fork"); close(fds[0]); close(fds[1]); return; }
+    if (pid < 0) { perror("fork"); close(sv[0]); close(sv[1]); return; }
 
     if (pid == 0) {
-        dup2(fds[1], STDOUT_FILENO);
-        execl("./slave", "slave", (char*)nullptr);
+        close(sv[0]);
+
+        fcntl(sv[1], F_SETFD, fcntl(sv[1], F_GETFD) & ~FD_CLOEXEC);
+
+        char fdstr[16];
+        snprintf(fdstr, sizeof fdstr, "%d", sv[1]);
+        execl("./build/gameServer", "gameServer", fdstr, (char*)nullptr);
         _exit(127);
     }
 
-    close(fds[1]);
+    close(sv[1]);
 
-    connectionService.createNewConnection(fds[0], onNewServerMessage, sockaddr_in{});
-    printf("[MasterServer] GameServer starte. PID:%d\n", pid);
+    connectionService.createNewConnection(sv[0], onNewServerMessage, sockaddr_in{});
+    printf("[MasterServer] GameServer started. PID:%d\n", pid);
 }
 
 void handleMsgStartGame(Player& player, const char* del){
-    if(!isGameServerActive){
+    if(isGameServerActive){
+        std::string serverInfoMessage = messageBuilder.createMessage((int)MessageType::GameServerInfo, gameServerData.tcpPort);
+        connectionService.sendTcpMessageTo(*player.connection, serverInfoMessage);
+        return;
+    }
+
+    if(!isGameServerActivating){
         startGameServer();
     }
 
-    std::string gameServerInfoMessage = messageBuilder.createMessage((int)MessageType::GameServerInfo, gameServerPort);
-    connectionService.sendTcpMessageTo(*player.connection, gameServerInfoMessage);
+    isGameServerActivating = true;
+    playersWaitingForServer.push_back(&player);
 }

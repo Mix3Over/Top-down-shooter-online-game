@@ -17,6 +17,8 @@ class Connection{
         sockaddr_in udpAddress;
         bool isUdpInitialized = false;
 
+        Connection() = default;
+
         Connection(int tcpFd, void(*onNewMessage)(const Connection& connection, const std::string& message), sockaddr_in udpAddress);
 
         bool operator==(const Connection& other) const {

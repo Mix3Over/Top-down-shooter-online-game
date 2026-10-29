@@ -4,6 +4,9 @@
 
 class MessageBuilder {
     public:
+        const char fieldSeparator = ';';
+        const char messageEndChar = '~';
+
         MessageBuilder(int messageTypesCount);
 
         template <typename ...Args>
@@ -16,8 +19,7 @@ class MessageBuilder {
         }
 
     private:
-        const char fieldSeparator = ';';
-        const char messageEndChar = '~';
+
         const int messageTypesCount;
 
         template <typename T>

@@ -11,14 +11,6 @@
 #include "player.hpp"
 #include "bullet.hpp"
 
-enum class GameType {
-    FFA,
-    Solo_Deathmatch,
-    Solo_LastManStanding,
-    Team_Deathmatch,
-    Team_LastManStanding
-};
-
 const int bulletLifetime = 128;
 const int ticksPerSecond = 32;
 
