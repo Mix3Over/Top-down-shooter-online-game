@@ -6,6 +6,19 @@ using UnityEngine;
 
 public class GameManager : Singleton<GameManager>
 {
+    public enum MessageType
+    {
+        ServerInfo,
+        InitLocalPlayer,
+        InitPlayers,
+        AddRemotePlayer,
+        RemoveRemotePlayer,
+        BulletSpawn,
+        PlayerHit,
+        RemoveBullet,
+        PlayerScores
+    }
+
     public static event Action PlayerScoresUpdated;
 
     [SerializeField] private List<PlayerTypeData> _playerTypes;
@@ -14,10 +27,11 @@ public class GameManager : Singleton<GameManager>
     [SerializeField] private GameObject _bulletPrefab;
     [SerializeField] private Transform _playersParent;
 
+    public Player LocalPlayer { get; private set; }
     public IReadOnlyDictionary<int, Player> Players => _players;
+
     private readonly Dictionary<int, Player> _players = new ();
     private readonly Dictionary<int, Bullet> _bullets = new ();
-    public Player LocalPlayer { get; private set; }
 
     private void Start()
     {
@@ -77,29 +91,31 @@ public class GameManager : Singleton<GameManager>
         }
 
         string trimmedMessage = message[1..].Trim(';');
-        switch (parts[0]) {
-            case "I":
+        int.TryParse(parts[0], out int messageType);
+
+        switch ((MessageType)messageType) {
+            case MessageType.InitLocalPlayer:
                 InitLocalPlayer(trimmedMessage);
                 break;
-            case "M":
+            case MessageType.InitPlayers:
                 InitPlayers(trimmedMessage);
                 break;
-            case "C":
+            case MessageType.AddRemotePlayer:
                 AddRemotePlayer(trimmedMessage);
                 break;
-            case "D":
+            case MessageType.RemoveRemotePlayer:
                 RemovePlayer(trimmedMessage);
                 break;
-            case "S":
+            case MessageType.BulletSpawn:
                 SpawnBullet(trimmedMessage);
                 break;
-            case "H":
+            case MessageType.PlayerHit:
                 PlayerHit(trimmedMessage);
                 break;
-            case "E":
+            case MessageType.RemoveBullet:
                 RemoveBullet(trimmedMessage);
                 break;
-            case "P":
+            case MessageType.PlayerScores:
                 UpdatePlayerScores(trimmedMessage);
                 break;
         }

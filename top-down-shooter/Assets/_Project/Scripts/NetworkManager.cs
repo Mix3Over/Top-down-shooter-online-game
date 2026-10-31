@@ -13,12 +13,12 @@ public class NetworkManager : Singleton<NetworkManager>
     public event Action<string> TcpMessageReceived;
     public event Action<string> UdpMessageReceived;
 
-    public int PlayerID { get; private set; }   
+    public int PlayerID { get; private set; }
     public bool IsConnected { get; private set; }
     public int UdpLocalPort { get; private set; }
 
     private const int TimeoutSeconds = 3;
-    
+
     private Socket _tcpSocket;
     private UdpClient _udpClient;
 
@@ -34,9 +34,9 @@ public class NetworkManager : Singleton<NetworkManager>
 
     private void Update()
     {
-        if (!IsConnected || Time.time - _lastMessageReceivedTime < TimeoutSeconds) 
+        if (!IsConnected || Time.time - _lastMessageReceivedTime < TimeoutSeconds)
             return;
-        
+
         Debug.Log("Connection timed out due to inactivity.");
         Disconnect();
         if(UIManager.Instance != null && UIManager.Instance.InfoUI != null)
@@ -45,8 +45,6 @@ public class NetworkManager : Singleton<NetworkManager>
 
     public async void ConnectToServer(IPAddress ipAddr, int port, string playerName)
     {
-        // IPHostEntry ipHost = Dns.GetHostEntry(Dns.GetHostName());
-        
         IPEndPoint ipEndPoint = new(ipAddr, port);
 
         _tcpSocket = new Socket(
@@ -54,7 +52,7 @@ public class NetworkManager : Singleton<NetworkManager>
             SocketType.Stream,
             ProtocolType.Tcp);
 
-        _connectCancelToken = new CancellationTokenSource(); 
+        _connectCancelToken = new CancellationTokenSource();
         CancellationToken userToken = _connectCancelToken.Token;
 
         Task connectTask = _tcpSocket.ConnectAsync(ipEndPoint);
@@ -93,14 +91,17 @@ public class NetworkManager : Singleton<NetworkManager>
 
         Debug.Log("Connected to server via TCP");
         string message = await TcpReceiveMessage();
-        Debug.Log("Received TCP init message: " + message);
         string[] messageParts = message.Trim('~').Split(';');
 
-        if (!int.TryParse(messageParts[0], out int udpPort)) {
+        if (messageParts.Length != 3 || !int.TryParse(messageParts[0], out int messageType) || messageType != (int)GameManager.MessageType.ServerInfo) {
+            Debug.LogError("Incorrect ServerInfo message format: " +  message);
+            return;
+        }
+        if (!int.TryParse(messageParts[1], out int udpPort)) {
             Debug.LogError("Failed parsing a udp port: " +  messageParts[0]);
             return;
         }
-        if (!int.TryParse(messageParts[1], out int playerID)) {
+        if (!int.TryParse(messageParts[2], out int playerID)) {
             Debug.LogError("Failed parsing a playerID: " + messageParts[1]);
             return;
         }
@@ -117,7 +118,7 @@ public class NetworkManager : Singleton<NetworkManager>
 
         _lastMessageReceivedTime = Time.time;
         IsConnected = true;
-        
+
         SceneLoader.StartGame();
 
         TcpReceiveLoop();
@@ -161,12 +162,12 @@ public class NetworkManager : Singleton<NetworkManager>
                     message += part;
                 }
                 string messageToProcess = message[..message.IndexOf('~')];
-                
+
                 if(message.IndexOf('~') + 1 >= message.Length)
                     message = "";
                 else
                     message = message[(message.IndexOf('~') + 1)..];
-                
+
                 Debug.Log("[TCP] Received: " + messageToProcess);
                 TcpMessageReceived?.Invoke(messageToProcess);
             }

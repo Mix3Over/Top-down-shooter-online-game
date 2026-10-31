@@ -7,9 +7,31 @@
 
 #include "common/utils.hpp"
 #include "common/connectionService.hpp"
+#include "common/messageBuilder.hpp"
 
 #include "player.hpp"
 #include "bullet.hpp"
+
+enum class SendMessage {
+    ServerInfo,
+    InitLocalPlayer,
+    InitPlayers,
+    AddRemotePlayer,
+    RemoveRemotePlayer,
+    BulletSpawn,
+    PlayerHit,
+    RemoveBullet,
+    PlayerScores,
+    MessageTypeCount // Must be last
+};
+
+enum class ReceiveMessage {
+    Init,
+    StartGame
+};
+
+const MessageBuilder messageBuilder((int)SendMessage::MessageTypeCount);
+ConnectionService connectionService;
 
 const int bulletLifetime = 128;
 const int ticksPerSecond = 32;
@@ -23,8 +45,6 @@ std::unordered_map<int, Bullet> idToBullet;
 std::unordered_map<int, Player*> idToPlayer;
 std::unordered_map<const Connection*, Player> connectionToPlayerMap;
 
-ConnectionService connectionService;
-
 void handleMsgInit(Player& player, const char* del);
 void handleMsgShoot(Player& player, const char* del);
 
@@ -33,8 +53,8 @@ void onNewConnection(Connection& connection) {
     Player& newPlayer = connectionToPlayerMap[&connection];
     idToPlayer[newPlayer.id] = &newPlayer;
 
-    std::string s = std::to_string(connectionService.getUdpPort()) + ";" + std::to_string(newPlayer.id) + "~";
-    connectionService.sendTcpMessageTo(*newPlayer.connection, s);
+    std::string initMessage = messageBuilder.createMessage((int)SendMessage::ServerInfo, connectionService.getUdpPort(), newPlayer.id);
+    connectionService.sendTcpMessageTo(*newPlayer.connection, initMessage);
 }
 
 void onNewTcpMessage(const Connection& connection, const std::string& message) {
@@ -48,7 +68,7 @@ void onNewTcpMessage(const Connection& connection, const std::string& message) {
     std::vector<char> msgBuf(message.begin(), message.end());
     msgBuf.push_back('\0');
 
-    const char* del = ";";
+    const char* del = &messageBuilder.fieldSeparator;
     char *t = strtok(msgBuf.data(), del);
     
     if (!t) return;
@@ -108,7 +128,8 @@ void onPlayerDisconnected(const Connection& connection) {
     idToPlayer.erase(player->id);
 
     printf("Client Id: %d, tcpFd: %d disconnected\n", player->id, player->connection->tcpFd);
-    std::string discconnectMessage = "D;" + std::to_string(player->id) + "~";
+
+    std::string discconnectMessage = messageBuilder.createMessage((int)SendMessage::RemoveRemotePlayer, player->id);
 
     connectionToPlayerMap.erase(&connection);
     connectionService.sendTcpMessageToAll(discconnectMessage);
@@ -131,20 +152,25 @@ void handleMsgInit(Player& player, const char* del) {
     player.Initialize(playerUdpPort, name, type, damage, bulletSpeed, hp);
     printf("[GameServer] Player initialized: %d", player.isAlive);
 
-    std::string s = "I;" + std::to_string(player.positionX) + ";" + std::to_string(player.positionY) + "~";
-    connectionService.sendTcpMessageTo(*player.connection, s);
+    std::string initMessage = messageBuilder.createMessage((int)SendMessage::InitLocalPlayer, player.positionX, player.positionY);
+    connectionService.sendTcpMessageTo(*player.connection, initMessage);
         
-    std::string map = "M;";
-    for(const auto& i : idToPlayer){
-        if(!i.second->isAlive)
-            continue;
-        map = map + std::to_string(i.second->id) + ";" + i.second->name + ";" + std::to_string(i.second->type) + ";" + std::to_string(i.second->positionX) + ";" + std::to_string(i.second->positionY) + ";" + std::to_string(i.second->rotation) + ";" + std::to_string(i.second->health) + "!";
+    std::string records;
+    for (const auto& [id, player] : idToPlayer) {
+        if (!player->isAlive) continue;
+        records += messageBuilder.createRecord(
+            player->id, player->name, player->type,
+            player->positionX, player->positionY,
+            player->rotation, player->health);
     }
-    map += "~";
-
+    std::string map = messageBuilder.createMessage((int)SendMessage::InitPlayers, records);
     connectionService.sendTcpMessageTo(*player.connection, map);
 
-    std::string newPlayerMessage = "C;" + std::to_string(player.id) + ";" + player.name + ";" + std::to_string(player.type) + ";" + std::to_string(player.positionX) + ";" + std::to_string(player.positionY) + ";" + std::to_string(player.rotation) + "~";
+    std::string newPlayerMessage = messageBuilder.createMessage(
+        (int)SendMessage::AddRemotePlayer, 
+        player.id, player.name, player.type, 
+        player.positionX, player.positionY, player.rotation);
+
     connectionService.sendTcpMessageToAll(newPlayerMessage);
 }
 
@@ -176,7 +202,7 @@ void handleMsgShoot(Player& player, const char* del) {
 
     printf("Player %d shot bullet %d at (%d, %d) with rotation %d\n", player.id, bulletData.id, positionX, positionY, rotation);
     
-    std::string shootMessage = "S;" + std::to_string(bulletData.id) + ";" + std::to_string(bulletData.playerId) + ";" + std::to_string(bulletData.positionX) + ";" + std::to_string(bulletData.positionY) + ";" + std::to_string(bulletData.direction) + "~";
+    std::string shootMessage = messageBuilder.createMessage((int)SendMessage::BulletSpawn, bulletData.id, bulletData.playerId, bulletData.positionX, bulletData.positionY, bulletData.direction);
     connectionService.sendTcpMessageToAll(shootMessage);
 }
 
@@ -218,11 +244,12 @@ void bulletsUpdate(int deltaTime) {
                     idToPlayer[player->id]->health = 0;
                 }
 
-                std::string hitMessage = 
-                    "H;" + std::to_string(player->id) + ";" + 
-                    std::to_string(bulletData.id) + ";" + 
-                    std::to_string(idToPlayer[player->id]->health) + ";" + 
-                    std::to_string(idToPlayer[player->id]->isAlive) + "~";
+                std::string hitMessage = messageBuilder.createMessage((int)SendMessage::PlayerHit,
+                    player->id, 
+                    bulletData.id,
+                    idToPlayer[player->id]->health,
+                    idToPlayer[player->id]->isAlive
+                );
 
                 connectionService.sendTcpMessageToAll(hitMessage);
 
@@ -238,7 +265,7 @@ void bulletsUpdate(int deltaTime) {
         bulletData.lifetime -= 1;
 
         if (bulletData.lifetime <= 0) {
-            std::string mess = "E;" + std::to_string(bulletData.id) + "~";
+            std::string mess = messageBuilder.createMessage((int)SendMessage::RemoveBullet,bulletData.id);
             connectionService.sendTcpMessageToAll(mess);
 
             it = idToBullet.erase(it);
@@ -249,18 +276,19 @@ void bulletsUpdate(int deltaTime) {
 }
 
 void updatePlayersScore(){
-    std::string scoreUpdate = "P;";
     for(const auto& i : idToPlayer){
         if(i.second->isAlive)
-            idToPlayer[i.first]->points += 1;
+        idToPlayer[i.first]->points += 1;
     }
-    for(const auto& i : idToPlayer){
-        if(!i.second->isAlive)
+
+    std::string records;
+    for(const auto& [id, player] : idToPlayer){
+        if(!player->isAlive)
             continue;
-        scoreUpdate = scoreUpdate + std::to_string(i.second->id) + ";" + std::to_string(i.second->points) + "!";
-        
+        records += messageBuilder.createRecord(id, player->points);
     }
-    scoreUpdate += "~";
+
+    std::string scoreUpdate = messageBuilder.createMessage((int)SendMessage::PlayerScores, records);
     connectionService.sendTcpMessageToAll(scoreUpdate);
 }
 

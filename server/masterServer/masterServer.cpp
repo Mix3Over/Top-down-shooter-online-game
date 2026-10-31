@@ -12,19 +12,24 @@
 
 #include <fcntl.h>
 
-enum class MessageType {
-    Init,
+enum class SendMessage {
+    ServerInfo,
     Heartbeat,
     PlayerCount,
     GameServerInfo,
     MessageTypeCount // Must be last
 };
 
+enum class ReceiveMessage {
+    Init,
+    StartGame
+};
+
+const MessageBuilder messageBuilder((int)SendMessage::MessageTypeCount);
+ConnectionService connectionService;
+
 int heartbeatInterval = 1000;
 int nextPlayerID = 0;
-
-ConnectionService connectionService;
-const MessageBuilder messageBuilder((int)MessageType::MessageTypeCount);
 
 std::unordered_map<int, Player*> idToPlayer;
 std::unordered_map<const Connection*, Player> connectionToPlayerMap;
@@ -41,7 +46,7 @@ void ctrl_c(int);
 void handleMsgStartGame(Player& player, const char* del);
 
 void sendPlayerCountMessageToAll(){
-    std::string playerCountMessage = messageBuilder.createMessage((int)MessageType::PlayerCount, idToPlayer.size());
+    std::string playerCountMessage = messageBuilder.createMessage((int)SendMessage::PlayerCount, idToPlayer.size());
     connectionService.sendTcpMessageToAll(playerCountMessage);
 }
 
@@ -59,7 +64,7 @@ void onNewServerMessage(const Connection& connection, const std::string& message
     // gameServer.OnServerStarted(tcpPort);
 
     for(auto player : playersWaitingForServer){
-        std::string serverInfoMessage = messageBuilder.createMessage((int)MessageType::GameServerInfo, tcpPort);
+        std::string serverInfoMessage = messageBuilder.createMessage((int)SendMessage::GameServerInfo, tcpPort);
         connectionService.sendTcpMessageTo(*player->connection, serverInfoMessage);
     }
 }
@@ -69,7 +74,7 @@ void onNewConnection(Connection& connection) {
     Player& newPlayer = connectionToPlayerMap[&connection];
     idToPlayer[newPlayer.id] = &newPlayer;
 
-    std::string initMessage = messageBuilder.createMessage((int)MessageType::Init, newPlayer.id);
+    std::string initMessage = messageBuilder.createMessage((int)SendMessage::ServerInfo, newPlayer.id);
     connectionService.sendTcpMessageTo(*newPlayer.connection, initMessage);
 
     sendPlayerCountMessageToAll();
@@ -120,7 +125,7 @@ void onPlayerDisconnected(const Connection& connection) {
 }
 
 void sendHeartbeat() {
-    std::string heartbeatMessage = messageBuilder.createMessage((int)MessageType::Heartbeat);
+    std::string heartbeatMessage = messageBuilder.createMessage((int)SendMessage::Heartbeat);
     connectionService.sendTcpMessageToAll(heartbeatMessage);
 }
 
@@ -206,7 +211,7 @@ void startGameServer(){
 
 void handleMsgStartGame(Player& player, const char* del){
     if(isGameServerActive){
-        std::string serverInfoMessage = messageBuilder.createMessage((int)MessageType::GameServerInfo, gameServerData.tcpPort);
+        std::string serverInfoMessage = messageBuilder.createMessage((int)SendMessage::GameServerInfo, gameServerData.tcpPort);
         connectionService.sendTcpMessageTo(*player.connection, serverInfoMessage);
         return;
     }
