@@ -14,7 +14,7 @@ Connection::Connection(
     sockaddr_in udpAddress): tcpFd(tcpFd), onNewMessage(onNewMessage), udpAddress(udpAddress) {}
 
 ConnectionService::ConnectionService(
-    const char *tcpPort,
+    int tcpPort,
     void(*onNewConnection)(Connection& connection), 
     void(*onNewTcpMessage)(const Connection& connection, const std::string& message),
     void(*onPlayerDisconnected)(const Connection& connection),
@@ -24,20 +24,19 @@ ConnectionService::ConnectionService(
 ): onNewConnection(onNewConnection), onNewTcpMessage(onNewTcpMessage), onPlayerDisconnected(onPlayerDisconnected), onNewUdpMessage(onNewUdpMessage) 
 {
 
-    int tcpPortResult;
-    tcpFd = getaddrinfo_socket_bind_listen(SOCK_STREAM, SPECIFIED_PORT, tcpPort, tcpPortResult);
+    tcpFd = getaddrinfo_socket_bind_listen(SOCK_STREAM, tcpPort, this->tcpPort);
     setNonBlocking(tcpFd);
     int flag = 1;
     setsockopt(tcpFd, IPPROTO_TCP, O_NDELAY, (char *)&flag, sizeof(int));
 
     if(createUdpSocket){
-        udpFd = getaddrinfo_socket_bind_listen(SOCK_DGRAM, RANDOM_PORT, nullptr, udpPort);
+        udpFd = getaddrinfo_socket_bind_listen(SOCK_DGRAM, RANDOM_PORT, this->udpPort);
         setNonBlocking(udpFd);
     
-        printf("TCP: %d, UDP: %d\n", tcpPortResult, udpPort);
+        printf("TCP: %d, UDP: %d\n", this->tcpPort, udpPort);
     }
     else{
-        printf("TCP: %d\n", tcpPortResult);
+        printf("TCP: %d\n", this->tcpPort);
     }
 
     epollDesc = epoll_create1(0);
@@ -48,8 +47,11 @@ ConnectionService::ConnectionService(
     epoll_ctl(epollDesc, EPOLL_CTL_ADD, STDIN_FILENO, &ee);
     ee.data.u32 = -1;
     epoll_ctl(epollDesc, EPOLL_CTL_ADD, tcpFd, &ee);
-    ee.data.u32 = -2;
-    epoll_ctl(epollDesc, EPOLL_CTL_ADD, udpFd, &ee);
+
+    if(createUdpSocket){
+        ee.data.u32 = -2;
+        epoll_ctl(epollDesc, EPOLL_CTL_ADD, udpFd, &ee);
+    }
 }
 
 void ConnectionService::listenForEvents(int timeout)
@@ -72,20 +74,19 @@ void ConnectionService::listenForEvents(int timeout)
 }
 
 void ConnectionService::handleNewClient(epoll_event& ee){
-    // prepare placeholders for client address
     sockaddr_storage clientAddr{};
     socklen_t clientAddrSize = sizeof(clientAddr);
 
-    // accept new connection
     int clientFd = accept(tcpFd, (sockaddr *)&clientAddr, &clientAddrSize);
-    if (clientFd == -1)
+    if (clientFd == -1){
         perror("accept failed");
+        return;
+    }
 
     setNonBlocking(clientFd);
     int flag = 1;
     setsockopt(clientFd, IPPROTO_TCP, O_NDELAY, (char *)&flag, sizeof(int));
 
-    // tell who has connected
     char host[NI_MAXHOST], port[NI_MAXSERV];
     getnameinfo((sockaddr *)&clientAddr, clientAddrSize, host, NI_MAXHOST, port, NI_MAXSERV, 0);
     printf("New connection from: %s:%s (fd: %d)\n", host, port, clientFd);
@@ -100,6 +101,7 @@ void ConnectionService::handleTcpMessage(epoll_event& ee) {
     int connectionFd = ee.data.fd;
 
     if(!fdToConnection.contains(connectionFd)){
+        printf("[ConnectionService] Received message from unknown connection: %d\n", connectionFd);
         closeConnection(connectionFd);
         return;
     }
@@ -131,7 +133,7 @@ void ConnectionService::handleTcpMessage(epoll_event& ee) {
     }
 }
 
-int ConnectionService::getaddrinfo_socket_bind_listen(int sockType, int portOption, const char *port, int& resultPort) {
+int ConnectionService::getaddrinfo_socket_bind_listen(int sockType, int port, int& resultPort) {
     addrinfo *res, hints{};
     hints.ai_flags = AI_PASSIVE;
     // hints.ai_socktype = SOCK_STREAM;
@@ -139,10 +141,10 @@ int ConnectionService::getaddrinfo_socket_bind_listen(int sockType, int portOpti
 
     int rv;
 
-    if(portOption == RANDOM_PORT)
+    if(port == RANDOM_PORT)
         rv = getaddrinfo(nullptr, "0", &hints, &res);
     else
-        rv = getaddrinfo(nullptr, port, &hints, &res);
+        rv = getaddrinfo(nullptr, std::to_string(port).c_str(), &hints, &res);
 
     if (rv) 
         error(1, 0, "getaddrinfo: %s", gai_strerror(rv));
@@ -178,8 +180,8 @@ int ConnectionService::getaddrinfo_socket_bind_listen(int sockType, int portOpti
     if (rv)
         error(1, 0, "getnameinfo: %s", gai_strerror(rv));
 
-    if(portOption == SPECIFIED_PORT && atoi(port) != atoi(result_port)){
-        printf("Failed creating socket at port: %s\n", port);
+    if(port != RANDOM_PORT && port != atoi(result_port)){
+        printf("Failed creating socket at port: %s\n", std::to_string(port).c_str());
         exit(1);
     }
 
@@ -213,6 +215,10 @@ void ConnectionService::handleDisconnect(const Connection& connection){
 
 int ConnectionService::getUdpPort() const {
     return udpPort;
+}
+
+int ConnectionService::getTcpPort() const {
+    return tcpPort;
 }
 
 void ConnectionService::closeAllConnections() {
@@ -289,7 +295,7 @@ Connection& ConnectionService::createNewConnection(int fd, void(*onNewMessage)(c
     ee.data.fd = fd;
     epoll_ctl(epollDesc, EPOLL_CTL_ADD, fd, &ee);
 
-    fdToConnection.try_emplace(fd, fd, onNewTcpMessage, udpAddress);
+    fdToConnection.try_emplace(fd, fd, onNewMessage, udpAddress);
 
     return fdToConnection[fd];
 }

@@ -41,40 +41,23 @@ public class GameManager : Singleton<GameManager>
 
     private void OnEnable()
     {
-        NetworkManager.Instance.Disconnected += OnDisconnected;
-        NetworkManager.Instance.TcpMessageReceived += OnTcpMessageReceived;
-        NetworkManager.Instance.UdpMessageReceived += OnUdpMessageReceived;
+        ConnectionManager.Instance.TcpMessageReceived += OnTcpMessageReceived;
+        ConnectionManager.Instance.UdpMessageReceived += OnUdpMessageReceived;
     }
 
     private void OnDisable()
     {
-        NetworkManager.Instance.Disconnected -= OnDisconnected;
-        NetworkManager.Instance.TcpMessageReceived -= OnTcpMessageReceived;
-        NetworkManager.Instance.UdpMessageReceived -= OnUdpMessageReceived;
-    }
-
-    private void OnDisconnected()
-    {
-        foreach (Player player in _players.Values.Where(player => player != null))
-            Destroy(player.gameObject);
-
-        foreach (Bullet bullet in _bullets.Values.Where(bullet => bullet != null))
-            Destroy(bullet.gameObject);
-
-        _players.Clear();
-        _bullets.Clear();
-        LocalPlayer = null;
-
-        if(UIManager.Instance != null && UIManager.Instance.LeaderboardUI)
-            UIManager.Instance.LeaderboardUI.Close();
+        ConnectionManager.Instance.TcpMessageReceived -= OnTcpMessageReceived;
+        ConnectionManager.Instance.UdpMessageReceived -= OnUdpMessageReceived;
     }
 
     public void SpawnLocalPlayer(int playerTypeIndex)
     {
         UIManager.Instance.LeaderboardUI.Open();
         PlayerTypeData playerTypeData = _playerTypes[playerTypeIndex];
-        NetworkManager.Instance.TcpSendMessageToServer($"I;" +
-            $"{NetworkManager.Instance.UdpLocalPort};" +
+        ConnectionManager.Instance.TcpSendMessageToGameServer(
+            $"I;" +
+            $"{ConnectionManager.Instance.UdpLocalPort};" +
             $"{UIManager.Instance.LobbyUI.PlayerName};" +
             $"{playerTypeIndex};{playerTypeData.BulletDamage};" +
             $"{playerTypeData.BulletSpeed};" +
@@ -123,6 +106,7 @@ public class GameManager : Singleton<GameManager>
 
     private void UpdatePlayerScores(string message)
     {
+        Debug.Log("Received score update");
         string[] playersData = message.Split("!");
 
         foreach (string playerData in playersData) {
@@ -215,7 +199,7 @@ public class GameManager : Singleton<GameManager>
 
         Destroy(player.gameObject);
 
-        if(playerId == NetworkManager.Instance.PlayerID) {
+        if(playerId == ConnectionManager.Instance.PlayerID) {
             UIManager.Instance.InfoUI.Open("You died", "Play again", UIManager.Instance.PlayerTypeSelectionUI.Open);
         } else {
             _players.Remove(playerId);
@@ -348,7 +332,7 @@ public class GameManager : Singleton<GameManager>
         LocalPlayer.Init(_playerTypes[playerTypeIndex], UIManager.Instance.LobbyUI.PlayerName, -1);
 
         LocalPlayer.SetPositionAndRotation(position, 0f);
-        _players[NetworkManager.Instance.PlayerID] = LocalPlayer;
+        _players[ConnectionManager.Instance.PlayerID] = LocalPlayer;
         _playerCamera.Target.TrackingTarget = LocalPlayer.transform;
     }
 
@@ -364,6 +348,8 @@ public class GameManager : Singleton<GameManager>
 
     private void AddRemotePlayer(string message)
     {
+        Debug.Log("Spawn remote player from message: " + message);
+
         if (message == string.Empty)
             return;
         string[] parts = message.Split(";");
@@ -399,7 +385,7 @@ public class GameManager : Singleton<GameManager>
             }
         }
 
-        if (NetworkManager.Instance.PlayerID == playerId)
+        if (ConnectionManager.Instance.PlayerID == playerId)
             return;
 
         if (_players.ContainsKey(playerId)) {

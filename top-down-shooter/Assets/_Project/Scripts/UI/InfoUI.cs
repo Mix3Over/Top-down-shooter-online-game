@@ -16,18 +16,19 @@ public class InfoUI : UIWindow
         _confirmButton.onClick.AddListener(OnConfirmButtonClicked);
     }
 
-    public void Open(string text, string buttonText, Action buttonPressed)
+    public void Open(string text, string buttonText, Action buttonPressed, bool showCloseButton = true)
     {
         _text.text = text;
         _confirmButton.GetComponentInChildren<TMP_Text>().text = buttonText;
+        _confirmButton.gameObject.SetActive(showCloseButton);
         _buttonPressed = buttonPressed;
         Open();
     }
 
     private void OnConfirmButtonClicked()
     {
-        _buttonPressed?.Invoke();
         Close();
+        _buttonPressed?.Invoke();
     }
 
     public override void Close()

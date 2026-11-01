@@ -2,6 +2,7 @@
 #include <cmath>
 #include <signal.h>
 
+#include <string>
 #include <vector>
 #include <unordered_map>
 
@@ -13,7 +14,7 @@
 #include "bullet.hpp"
 
 enum class SendMessage {
-    ServerInfo,
+    Init,
     InitLocalPlayer,
     InitPlayers,
     AddRemotePlayer,
@@ -22,7 +23,7 @@ enum class SendMessage {
     PlayerHit,
     RemoveBullet,
     PlayerScores,
-    MessageTypeCount // Must be last
+    MessageTypeCount // Must be last, used to count message types
 };
 
 enum class ReceiveMessage {
@@ -32,6 +33,7 @@ enum class ReceiveMessage {
 
 const MessageBuilder messageBuilder((int)SendMessage::MessageTypeCount);
 ConnectionService connectionService;
+Connection* masterServerConnection;
 
 const int bulletLifetime = 128;
 const int ticksPerSecond = 32;
@@ -48,18 +50,22 @@ std::unordered_map<const Connection*, Player> connectionToPlayerMap;
 void handleMsgInit(Player& player, const char* del);
 void handleMsgShoot(Player& player, const char* del);
 
+void onNewMasterServerMessage(const Connection& connection, const std::string& message) {
+    printf("[G] Received message from master server: %s\n", message.c_str());
+}
+
 void onNewConnection(Connection& connection) {
     connectionToPlayerMap[&connection] = Player(nextPlayerID++, connection);
     Player& newPlayer = connectionToPlayerMap[&connection];
     idToPlayer[newPlayer.id] = &newPlayer;
 
-    std::string initMessage = messageBuilder.createMessage((int)SendMessage::ServerInfo, connectionService.getUdpPort(), newPlayer.id);
+    std::string initMessage = messageBuilder.createMessage((int)SendMessage::Init, connectionService.getUdpPort(), newPlayer.id);
     connectionService.sendTcpMessageTo(*newPlayer.connection, initMessage);
 }
 
 void onNewTcpMessage(const Connection& connection, const std::string& message) {
     if(!connectionToPlayerMap.contains(&connection)) {
-        printf("Received message from unknown connection\n");
+        printf("[G] Received message from unknown connection\nSource: %d\nMessage: %s\n", connection.tcpFd, message.c_str());
         return;
     }
 
@@ -83,7 +89,7 @@ void onNewTcpMessage(const Connection& connection, const std::string& message) {
             handleMsgShoot(player, del);
             break;
         default:
-            printf("Unknown message type: %c\n", messageType);
+            printf("[GS] Unknown message type: %c\n", messageType);
             break;
     }
 }
@@ -150,7 +156,7 @@ void handleMsgInit(Player& player, const char* del) {
     int hp = atoi(t);
 
     player.Initialize(playerUdpPort, name, type, damage, bulletSpeed, hp);
-    printf("[GameServer] Player initialized: %d", player.isAlive);
+    printf("[GameServer] Player initialized: %d\n", player.isAlive);
 
     std::string initMessage = messageBuilder.createMessage((int)SendMessage::InitLocalPlayer, player.positionX, player.positionY);
     connectionService.sendTcpMessageTo(*player.connection, initMessage);
@@ -320,10 +326,8 @@ int main(int argc, char **argv) {
     if (argc != 2) 
         error(1, 0, "Usage: %s <tcp-port>", argv[0]);
 
-    int tcpPort = atoi(argv[1]);
-
-    if (tcpPort > 65535 || tcpPort < 1024)
-        error(1, 0, "Port must be in range 1024-65535");
+    int masterServerFd = atoi(argv[1]);
+    printf("arg1 %d\n", masterServerFd);
 
     srand(time(0));
 
@@ -333,7 +337,7 @@ int main(int argc, char **argv) {
     signal(SIGPIPE, SIG_IGN);
 
     connectionService = ConnectionService(
-        argv[1], 
+        RANDOM_PORT, 
         onNewConnection, 
         onNewTcpMessage,
         onPlayerDisconnected,
@@ -341,6 +345,11 @@ int main(int argc, char **argv) {
         true, 
         onNewUdpMessage
     );
+
+    masterServerConnection = &connectionService.createNewConnection(masterServerFd, onNewMasterServerMessage, sockaddr_in{});
+    std::string message = std::to_string(connectionService.getTcpPort()) + '~';
+    printf("[G] Sending message to master server: %s\n", message.c_str());
+    connectionService.sendTcpMessageTo(*masterServerConnection, message);
 
     int cooldown = 1000 / ticksPerSecond;
     auto lastTickTime = std::chrono::high_resolution_clock::now();

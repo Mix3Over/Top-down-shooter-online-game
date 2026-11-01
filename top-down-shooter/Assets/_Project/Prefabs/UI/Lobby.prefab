@@ -211,6 +211,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: IpInputField
       objectReference: {fileID: 0}
+    - target: {fileID: 557161628515795994, guid: 1c8a640f64c70f844a586ac5dbb4b79e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1008206843726036924, guid: 1c8a640f64c70f844a586ac5dbb4b79e, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -339,6 +343,10 @@ PrefabInstance:
     - target: {fileID: 557161628515795994, guid: 1c8a640f64c70f844a586ac5dbb4b79e, type: 3}
       propertyPath: m_Name
       value: PortInputField
+      objectReference: {fileID: 0}
+    - target: {fileID: 557161628515795994, guid: 1c8a640f64c70f844a586ac5dbb4b79e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1008206843726036924, guid: 1c8a640f64c70f844a586ac5dbb4b79e, type: 3}
       propertyPath: m_Pivot.x

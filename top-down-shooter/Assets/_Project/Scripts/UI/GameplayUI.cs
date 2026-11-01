@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,7 +5,7 @@ public class GameplayUI : UIWindow
 {
     [field: SerializeField] public LeaderboardUI LeaderboardUI { get; private set; }
     [field: SerializeField] public PlayerTypeSelectionUI PlayerTypeSelectionUI { get; private set; }
-    
+
     [SerializeField] private Button _disconnectButton;
 
     protected override void Awake()
@@ -14,7 +13,7 @@ public class GameplayUI : UIWindow
         base.Awake();
         _disconnectButton.onClick.AddListener(() =>
         {
-            NetworkManager.Instance.Disconnect();
+            ConnectionManager.Instance.DisconnectGameServer();
             Close();
         });
     }
@@ -22,7 +21,7 @@ public class GameplayUI : UIWindow
     public override void Open()
     {
         base.Open();
-        
+
         LeaderboardUI.Open();
         PlayerTypeSelectionUI.Open();
     }

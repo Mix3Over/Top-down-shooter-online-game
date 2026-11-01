@@ -61,7 +61,7 @@ public class PlayerController : MonoBehaviour
 
     private void Shoot()
     {
-        if (!NetworkManager.Instance.IsConnected)
+        if (!ConnectionManager.Instance.IsConnected)
             return;
 
         if (Time.time - _lastShootTime < _player.PlayerTypeData.ShootingCooldown)
@@ -69,17 +69,17 @@ public class PlayerController : MonoBehaviour
 
         _lastShootTime = Time.time;
         Vector2Int position = transform.position.ToServer();
-        NetworkManager.Instance.TcpSendMessageToServer(
+        ConnectionManager.Instance.TcpSendMessageToGameServer(
             $"S;{position.x};{position.y};{Mathf.RoundToInt(_player.Visual.transform.eulerAngles.z)};");
     }
 
     private void SendTransformData()
     {
-        if (!NetworkManager.Instance.IsConnected)
+        if (!ConnectionManager.Instance.IsConnected)
             return;
 
         Vector2Int position = transform.position.ToServer();
-        NetworkManager.Instance.UdpSendMessageToServer(
-            $"{NetworkManager.Instance.PlayerID};{position.x};{position.y};{Mathf.RoundToInt(_player.Visual.transform.eulerAngles.z)};");
+        ConnectionManager.Instance.UdpSendMessageToGameServer(
+            $"{ConnectionManager.Instance.PlayerID};{position.x};{position.y};{Mathf.RoundToInt(_player.Visual.transform.eulerAngles.z)};");
     }
 }

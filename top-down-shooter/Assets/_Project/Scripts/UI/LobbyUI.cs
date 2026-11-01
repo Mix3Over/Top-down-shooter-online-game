@@ -37,7 +37,7 @@ public class LobbyUI : UIWindow
         }
         _nameInputField.text = _nameInputField.text.Replace('~', '.').Replace(':', '.').Replace(';', '.').Replace('!', '.');
 
-        NetworkManager.Instance.ConnectToServer(ipAddr, port, _nameInputField.text);
+        ConnectionManager.Instance.ConnectToGameServer(_nameInputField.text);
         Close();
     }
 

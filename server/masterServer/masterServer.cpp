@@ -1,6 +1,7 @@
 #include <chrono>
 #include <signal.h>
 
+#include <string>
 #include <vector>
 #include <unordered_map>
 
@@ -13,11 +14,11 @@
 #include <fcntl.h>
 
 enum class SendMessage {
-    ServerInfo,
+    Init,
     Heartbeat,
     PlayerCount,
     GameServerInfo,
-    MessageTypeCount // Must be last
+    MessageTypeCount  // Must be last, used to count message types
 };
 
 enum class ReceiveMessage {
@@ -46,8 +47,8 @@ void ctrl_c(int);
 void handleMsgStartGame(Player& player, const char* del);
 
 void sendPlayerCountMessageToAll(){
-    std::string playerCountMessage = messageBuilder.createMessage((int)SendMessage::PlayerCount, idToPlayer.size());
-    connectionService.sendTcpMessageToAll(playerCountMessage);
+    // std::string playerCountMessage = messageBuilder.createMessage((int)SendMessage::PlayerCount, idToPlayer.size());
+    // connectionService.sendTcpMessageToAll(playerCountMessage);
 }
 
 void onNewServerMessage(const Connection& connection, const std::string& message) {
@@ -56,17 +57,30 @@ void onNewServerMessage(const Connection& connection, const std::string& message
     //     return;
     // }
     // GameServerData& gameServer = connectionToServerMap[&connection];
+    printf("[M] Received message from game server: %s\n", message.c_str());
+
+    if(!isGameServerActivating){
+        printf("[M] Received message from game server but no game server is activating\n");
+        return;
+    }
+
     int tcpPort = atoi(message.c_str());
 
     gameServerData.isStarted = true;
     gameServerData.tcpPort = tcpPort;
 
     // gameServer.OnServerStarted(tcpPort);
+    printf("[M] Game server started on port: %d\n", tcpPort);
 
     for(auto player : playersWaitingForServer){
+        // ToDo: Send also IpAddress
         std::string serverInfoMessage = messageBuilder.createMessage((int)SendMessage::GameServerInfo, tcpPort);
+        printf("[M] Send game server info to player: %d\n", player->id);
         connectionService.sendTcpMessageTo(*player->connection, serverInfoMessage);
     }
+    playersWaitingForServer.clear();
+    isGameServerActivating = false;
+    isGameServerActive = true;
 }
 
 void onNewConnection(Connection& connection) {
@@ -74,7 +88,7 @@ void onNewConnection(Connection& connection) {
     Player& newPlayer = connectionToPlayerMap[&connection];
     idToPlayer[newPlayer.id] = &newPlayer;
 
-    std::string initMessage = messageBuilder.createMessage((int)SendMessage::ServerInfo, newPlayer.id);
+    std::string initMessage = messageBuilder.createMessage((int)SendMessage::Init, newPlayer.id);
     connectionService.sendTcpMessageTo(*newPlayer.connection, initMessage);
 
     sendPlayerCountMessageToAll();
@@ -82,7 +96,7 @@ void onNewConnection(Connection& connection) {
 
 void onNewTcpMessage(const Connection& connection, const std::string& message) {
     if(!connectionToPlayerMap.contains(&connection)) {
-        printf("Received message from unknown connection\n");
+        printf("[M] Received message from unknown connection\nSource: %d\nMessage: %s\n", connection.tcpFd, message.c_str());
         return;
     }
 
@@ -99,7 +113,7 @@ void onNewTcpMessage(const Connection& connection, const std::string& message) {
     char messageType = t[0];
 
     switch (messageType){
-        case 'G':
+        case '1':
             handleMsgStartGame(player, del);
             break;
         default:
@@ -125,8 +139,8 @@ void onPlayerDisconnected(const Connection& connection) {
 }
 
 void sendHeartbeat() {
-    std::string heartbeatMessage = messageBuilder.createMessage((int)SendMessage::Heartbeat);
-    connectionService.sendTcpMessageToAll(heartbeatMessage);
+    // std::string heartbeatMessage = messageBuilder.createMessage((int)SendMessage::Heartbeat);
+    // connectionService.sendTcpMessageToAll(heartbeatMessage);
 }
 
 int main(int argc, char **argv) {
@@ -146,7 +160,7 @@ int main(int argc, char **argv) {
     signal(SIGPIPE, SIG_IGN);
 
     connectionService = ConnectionService(
-        argv[1], 
+        tcpPort, 
         onNewConnection, 
         onNewTcpMessage,
         onPlayerDisconnected,
@@ -194,32 +208,30 @@ void startGameServer(){
 
     if (pid == 0) {
         close(sv[0]);
-
         fcntl(sv[1], F_SETFD, fcntl(sv[1], F_GETFD) & ~FD_CLOEXEC);
 
-        char fdstr[16];
-        snprintf(fdstr, sizeof fdstr, "%d", sv[1]);
-        execl("./build/gameServer", "gameServer", fdstr, (char*)nullptr);
+        std::string fdstr = std::to_string(sv[1]);
+        execl("./build/gameServer", "gameServer", fdstr.c_str(), (char*)nullptr);
         _exit(127);
     }
 
     close(sv[1]);
 
     connectionService.createNewConnection(sv[0], onNewServerMessage, sockaddr_in{});
-    printf("[MasterServer] GameServer started. PID:%d\n", pid);
+    printf("[M] Started game server. FD: %d GameServerFD: %d\n", sv[0], sv[1]);
 }
 
-void handleMsgStartGame(Player& player, const char* del){
+void handleMsgStartGame(Player& player, const char* del){   
     if(isGameServerActive){
         std::string serverInfoMessage = messageBuilder.createMessage((int)SendMessage::GameServerInfo, gameServerData.tcpPort);
         connectionService.sendTcpMessageTo(*player.connection, serverInfoMessage);
         return;
     }
 
+    playersWaitingForServer.push_back(&player);
+
     if(!isGameServerActivating){
+        isGameServerActivating = true;
         startGameServer();
     }
-
-    isGameServerActivating = true;
-    playersWaitingForServer.push_back(&player);
 }

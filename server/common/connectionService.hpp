@@ -6,7 +6,6 @@
 #include <unordered_map>
 
 #define RANDOM_PORT 0
-#define SPECIFIED_PORT 1
 
 class Connection{
     public:
@@ -39,8 +38,8 @@ class ConnectionService {
     public:
         ConnectionService() = default;
 
-        ConnectionService(
-            const char *tcpPort,
+        ConnectionService(  
+            int tcpPort,
             void(*onNewConnection)(Connection& connection), 
             void(*onNewTcpMessage)(const Connection& connection, const std::string& message),
             void(*onPlayerDisconnected)(const Connection& connection),
@@ -58,6 +57,7 @@ class ConnectionService {
         void sendUdpMessageTo(const Connection& connection, const std::string& message);
         void sendUdpMessageToAll(const std::string& message);
         int getUdpPort() const;
+        int getTcpPort() const;
 
         void closeAllConnections();
 
@@ -67,6 +67,7 @@ class ConnectionService {
         
         int tcpFd = -1;
         int udpFd = -1;
+        int tcpPort = -1;
         int udpPort = -1;
         int epollDesc = -1;
         epoll_event ee;
@@ -78,7 +79,7 @@ class ConnectionService {
     
         void(*onNewUdpMessage)(char* messageBuffer);
 
-        int getaddrinfo_socket_bind_listen(int sockType, int portOption, const char *port, int& resultPort);
+        int getaddrinfo_socket_bind_listen(int sockType, int port, int& resultPort);
         void setNonBlocking(int sock);
         void handleNewClient(epoll_event& ee);
         void handleTcpMessage(epoll_event& ee);
