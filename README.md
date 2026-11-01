@@ -1,13 +1,8 @@
-Build project: `g++ serwer.cpp` or
+Build server:
 ```
+cd server
 cmake -S . -B build
 cmake --build build
 ```
 
-Run server: `./build/serwer [tcp-port] [udp-port]`
-
-Run client on Linux:
-```
-chmod +x ./client/linux/client_linux.x86_64
-./client/linux/client_linux.x86_64
-```
+Run server: `./build/masterServer [tcp-port]`
