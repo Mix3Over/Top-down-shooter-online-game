@@ -53,6 +53,8 @@ public class ConnectionManager : Singleton<ConnectionManager>
 
     public async void ConnectToMasterServer()
     {
+        await UniTask.WaitUntil(() => UIManager.Instance != null && UIManager.Instance.InfoUI != null);
+
         DebugConnectionConfig debugConnectionConfig = Resources.Load<DebugConnectionConfig>("DebugConnectionConfig");
 
         if (debugConnectionConfig == null)
@@ -111,7 +113,7 @@ public class ConnectionManager : Singleton<ConnectionManager>
         using CancellationTokenSource connectCts = new();
         _gameServerDisconnectCts = new CancellationTokenSource();
 
-        TcpSendMessageToMasterServer("0;");
+        TcpSendMessageToMasterServer($"0;{(int)GameManager.SelectedGameType};");
 
         NetworkService.StartTcpLoopAsync(_masterTcpSocket, OnMasterServerMessageReceived, OnMasterServerDisconnected, connectCts.Token);
 

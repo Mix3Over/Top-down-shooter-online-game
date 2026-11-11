@@ -48,7 +48,7 @@ public class GameManager : Singleton<GameManager>
     private readonly Dictionary<int, Bullet> _bullets = new ();
 
     [field: SerializeField]
-    public GameType SelectedGameType {get; private set;} = GameType.FFA;
+    public static GameType SelectedGameType {get; set;} = GameType.FFA;
 
     private void Start()
     {
