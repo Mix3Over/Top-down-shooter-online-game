@@ -53,9 +53,9 @@ void handleMsgInit(Player& player, const char* del);
 void handleMsgShoot(Player& player, const char* del);
 
 void onNewMasterServerMessage(const Connection& connection, const std::string& message) {
-    printf("[G] Received message from master server: %s\n", message.c_str());
+    printf("[GameServer] Received message from master server: %s\n", message.c_str());
     int mode = atoi(message.c_str());
-    printf("[G] Game mode set to: %d\n", (int)currentGameType);
+    printf("[GameServer] Game mode set to: %d\n", (int)currentGameType);
 }
 
 void onNewConnection(Connection& connection) {
@@ -69,7 +69,7 @@ void onNewConnection(Connection& connection) {
 
 void onNewTcpMessage(const Connection& connection, const std::string& message) {
     if(!connectionToPlayerMap.contains(&connection)) {
-        printf("[G] Received message from unknown connection\nSource: %d\nMessage: %s\n", connection.tcpFd, message.c_str());
+        printf("[GameServer] Received message from unknown connection\nSource: %d\nMessage: %s\n", connection.tcpFd, message.c_str());
         return;
     }
 
@@ -130,14 +130,14 @@ void onNewUdpMessage(char* messageBuffer) {
 
 void onPlayerDisconnected(const Connection& connection) {
     if(!connectionToPlayerMap.contains(&connection)) {
-        printf("Unknown connection disconnected\n");
+        printf("[GameServer] Unknown connection disconnected\n");
         return;
     }
 
     Player* player = &connectionToPlayerMap[&connection];
     idToPlayer.erase(player->id);
 
-    printf("Client Id: %d, tcpFd: %d disconnected\n", player->id, player->connection->tcpFd);
+    printf("[GameServer] Client Id: %d, tcpFd: %d disconnected\n", player->id, player->connection->tcpFd);
 
     std::string discconnectMessage = messageBuilder.createMessage((int)SendMessage::RemoveRemotePlayer, player->id);
 
@@ -191,8 +191,6 @@ void handleMsgInit(Player& player, const char* del) {
 }
 
 void handleMsgShoot(Player& player, const char* del) {
-    printf("[GameServer] Handling shoot message %d\n", player.isAlive);
-
     char *t = strtok(nullptr, del);
     int positionX = atoi(t);
     t = strtok(nullptr, del);
@@ -216,7 +214,7 @@ void handleMsgShoot(Player& player, const char* del) {
 
     idToBullet[bulletData.id] = bulletData;
 
-    printf("Player %d shot bullet %d at (%d, %d) with rotation %d\n", player.id, bulletData.id, positionX, positionY, rotation);
+    printf("[GameServer] Player %d shot bullet %d at (%d, %d) with rotation %d\n", player.id, bulletData.id, positionX, positionY, rotation);
     
     std::string shootMessage = messageBuilder.createMessage((int)SendMessage::BulletSpawn, bulletData.id, bulletData.playerId, bulletData.positionX, bulletData.positionY, bulletData.direction);
     connectionService.sendTcpMessageToAll(shootMessage);
@@ -357,9 +355,9 @@ int main(int argc, char **argv) {
         onNewUdpMessage
     );
 
-    masterServerConnection = &connectionService.createNewConnection(masterServerFd, onNewMasterServerMessage, sockaddr_in{});
+    masterServerConnection = &connectionService.createConnection(masterServerFd, onNewMasterServerMessage, sockaddr_in{}, true);
     std::string message = std::to_string(connectionService.getTcpPort()) + '~';
-    printf("[G] Sending message to master server: %s\n", message.c_str());
+    printf("[GameServer] Sending message to master server: %s\n", message.c_str());
     connectionService.sendTcpMessageTo(*masterServerConnection, message);
 
     int cooldown = 1000 / ticksPerSecond;

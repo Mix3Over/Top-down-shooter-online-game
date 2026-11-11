@@ -61,7 +61,7 @@ class ConnectionService {
 
         void closeAllConnections();
 
-        Connection& createNewConnection(int fd, void(*onNewMessage)(const Connection& connection, const std::string& message), sockaddr_in udpAddress);
+        Connection& createConnection(int fd, void(*onNewMessage)(const Connection& connection, const std::string& message), sockaddr_in udpAddress, bool isAdditional);
 
     private:
         
@@ -72,6 +72,7 @@ class ConnectionService {
         int epollDesc = -1;
         epoll_event ee;
         std::unordered_map<int, Connection> fdToConnection;
+        std::unordered_map<int, Connection> additionalFdToConnection;
 
         void(*onNewConnection)(Connection& connection);
         void(*onNewTcpMessage)(const Connection& connection, const std::string& message);

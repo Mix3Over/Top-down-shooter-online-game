@@ -58,10 +58,10 @@ void onNewServerMessage(const Connection& connection, const std::string& message
     //     return;
     // }
     // GameServerData& gameServer = connectionToServerMap[&connection];
-    printf("[M] Received message from game server: %s\n", message.c_str());
+    printf("[MasterServer] Received message from game server: %s\n", message.c_str());
 
     if(!isGameServerActivating){
-        printf("[M] Received message from game server but no game server is activating\n");
+        printf("[MasterServer] Received message from game server but no game server is activating\n");
         return;
     }
 
@@ -71,12 +71,12 @@ void onNewServerMessage(const Connection& connection, const std::string& message
     gameServerData.tcpPort = tcpPort;
 
     // gameServer.OnServerStarted(tcpPort);
-    printf("[M] Game server started on port: %d\n", tcpPort);
+    printf("[MasterServer] Game server started on port: %d\n", tcpPort);
 
     for(auto player : playersWaitingForServer){
         // ToDo: Send also IpAddress
         std::string serverInfoMessage = messageBuilder.createMessage((int)SendMessage::GameServerInfo, tcpPort);
-        printf("[M] Send game server info to player: %d\n", player->id);
+        printf("[MasterServer] Send game server info to player: %d\n", player->id);
         connectionService.sendTcpMessageTo(*player->connection, serverInfoMessage);
     }
     playersWaitingForServer.clear();
@@ -90,14 +90,17 @@ void onNewConnection(Connection& connection) {
     idToPlayer[newPlayer.id] = &newPlayer;
 
     std::string initMessage = messageBuilder.createMessage((int)SendMessage::Init, newPlayer.id);
+
+    printf("[MasterServer] New player connected: %d, tcpFd: %d\n", newPlayer.id, newPlayer.connection->tcpFd);
     connectionService.sendTcpMessageTo(*newPlayer.connection, initMessage);
+    printf("[MasterServer] Init message sent to player: %d, tcpFd: %d\n", newPlayer.id, newPlayer.connection->tcpFd);
 
     sendPlayerCountMessageToAll();
 }
 
 void onNewTcpMessage(const Connection& connection, const std::string& message) {
     if(!connectionToPlayerMap.contains(&connection)) {
-        printf("[M] Received message from unknown connection\nSource: %d\nMessage: %s\n", connection.tcpFd, message.c_str());
+        printf("[MasterServer] Received message from unknown connection\nSource: %d\nMessage: %s\n", connection.tcpFd, message.c_str());
         return;
     }
 
@@ -125,14 +128,14 @@ void onNewTcpMessage(const Connection& connection, const std::string& message) {
 
 void onPlayerDisconnected(const Connection& connection) {
     if(!connectionToPlayerMap.contains(&connection)) {
-        printf("Unknown connection disconnected\n");
+        printf("[MasterServer] Unknown connection disconnected\n");
         return;
     }
 
     Player& player = connectionToPlayerMap[&connection];
     
     idToPlayer.erase(player.id);
-    printf("Client Id: %d, tcpFd: %d disconnected\n", player.id, player.connection->tcpFd);
+    printf("[MasterServer] Client Id: %d, tcpFd: %d disconnected\n", player.id, player.connection->tcpFd);
 
     connectionToPlayerMap.erase(&connection);
 
@@ -218,8 +221,8 @@ void startGameServer(){
 
     close(sv[1]);
 
-    connectionService.createNewConnection(sv[0], onNewServerMessage, sockaddr_in{});
-    printf("[M] Started game server. FD: %d GameServerFD: %d\n", sv[0], sv[1]);
+    connectionService.createConnection(sv[0], onNewServerMessage, sockaddr_in{}, true);
+    printf("[MasterServer] Started game server. FD: %d GameServerFD: %d\n", sv[0], sv[1]);
 }
 
 void handleMsgStartGame(Player& player, const char* del){   

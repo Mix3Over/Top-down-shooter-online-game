@@ -89,9 +89,9 @@ void ConnectionService::handleNewClient(epoll_event& ee){
 
     char host[NI_MAXHOST], port[NI_MAXSERV];
     getnameinfo((sockaddr *)&clientAddr, clientAddrSize, host, NI_MAXHOST, port, NI_MAXSERV, 0);
-    printf("New connection from: %s:%s (fd: %d)\n", host, port, clientFd);
+    printf("[ConnectionService] New connection from: %s:%s (fd: %d)\n", host, port, clientFd);
 
-    createNewConnection(clientFd, onNewTcpMessage, *(sockaddr_in*)&clientAddr);
+    createConnection(clientFd, onNewTcpMessage, *(sockaddr_in*)&clientAddr, false);
 
     if(onNewConnection != nullptr)
         onNewConnection(fdToConnection[clientFd]);
@@ -100,13 +100,13 @@ void ConnectionService::handleNewClient(epoll_event& ee){
 void ConnectionService::handleTcpMessage(epoll_event& ee) {
     int connectionFd = ee.data.fd;
 
-    if(!fdToConnection.contains(connectionFd)){
+    if(!fdToConnection.contains(connectionFd) && !additionalFdToConnection.contains(connectionFd)) {
         printf("[ConnectionService] Received message from unknown connection: %d\n", connectionFd);
         closeConnection(connectionFd);
         return;
     }
 
-    Connection& connection = fdToConnection[connectionFd];
+    Connection& connection = fdToConnection.contains(connectionFd) ? fdToConnection[connectionFd] : additionalFdToConnection[connectionFd];
 
     char buffer[255];
     int count = read(connection.tcpFd, buffer, 255);
@@ -289,13 +289,17 @@ void ConnectionService::handleUdpMessages(){
     }
 }
 
-Connection& ConnectionService::createNewConnection(int fd, void(*onNewMessage)(const Connection& connection, const std::string& message), sockaddr_in udpAddress){
+Connection& ConnectionService::createConnection(int fd, void(*onNewMessage)(const Connection& connection, const std::string& message), sockaddr_in udpAddress, bool isAdditional) {
     epoll_event ee{};
     ee.events = EPOLLIN;
     ee.data.fd = fd;
     epoll_ctl(epollDesc, EPOLL_CTL_ADD, fd, &ee);
 
-    fdToConnection.try_emplace(fd, fd, onNewMessage, udpAddress);
+    if(isAdditional){
+        additionalFdToConnection.try_emplace(fd, fd, onNewMessage, udpAddress);
+        return additionalFdToConnection[fd];
+    }
 
+    fdToConnection.try_emplace(fd, fd, onNewMessage, udpAddress);
     return fdToConnection[fd];
 }
