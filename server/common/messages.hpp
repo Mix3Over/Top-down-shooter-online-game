@@ -2,7 +2,7 @@
 
 #include <string>
 #include <tuple>
-#include <sstream>
+#include <charconv>
 #include <vector>
 
 const char fieldSeparator = ';';
@@ -63,22 +63,41 @@ struct OutgoingMultilineMessage {
 
 template <typename DerivedType>
 struct IncomingMessage {
-    void Parse(const std::string& message) {
-        std::istringstream is(message);
+    bool TryParse(const std::vector<std::string_view>& parts) {
+        size_t index = 1; // Skip message type
+        bool success = true;
+
         std::apply([&](auto&... f) {
-            (ParseField(is, f), ...);
+            ((success = success && ParseField(parts, index++, f)), ...);
         }, static_cast<DerivedType&>(*this).Fields());
+
+        return success;
     }
 
 private:
+
     template <typename T>
-    static void ParseField(std::istringstream& is, T& field) {
-        std::string token;
-        std::getline(is, token, fieldSeparator);
-        std::istringstream(token) >> field;
+    static bool ParseField(const std::vector<std::string_view>& parts, size_t i, T& field) {
+        if (i >= parts.size()) 
+            return false;
+
+        const auto& s = parts[i];
+        auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), field);
+        
+        return ec == std::errc{} && ptr == s.data() + s.size();
     }
 
-    static void ParseField(std::istringstream& is, std::string& field) {
-        std::getline(is, field, fieldSeparator);  
+    static bool ParseField(const std::vector<std::string_view>& parts, size_t i, std::string& field) {
+        if (i >= parts.size()) 
+            return false;
+
+        try {
+            field = std::string(parts[i]);
+        } 
+        catch (...) {
+            return false;
+        }
+
+        return true;
     }
 };

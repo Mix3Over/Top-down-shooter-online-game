@@ -1,18 +1,28 @@
-// #pragma once
+#pragma once
 
-// #include "common/messages.hpp"
+#include "common/messages.hpp"
 
-// namespace incoming {
+namespace incomingPlayerMessages {
 
-//     enum class Type {
-//         Init,
-//         StartGame
-//     };
+    enum class Type {
+        StartGame,
+    };
 
-//     struct TestMessage : IncomingMessage<TestMessage> {
-//         int id = 0;
-//         std::string name;
+    struct StartGameMessage : IncomingMessage<StartGameMessage> {
 
-//         auto Fields() { return std::tie(id, name); }
-//     };
-// }
+        auto Fields() { return std::tie(); }
+    };
+}
+
+namespace incomingGameServerMessages {
+
+    enum class Type {
+        ServerStarted,
+    };
+
+    struct GameServerStarted : IncomingMessage<GameServerStarted> {
+        int tcpPort = 0;
+
+        auto Fields() { return std::tie(tcpPort); }
+    };
+}

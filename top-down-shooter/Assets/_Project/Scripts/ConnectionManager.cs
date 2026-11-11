@@ -111,7 +111,7 @@ public class ConnectionManager : Singleton<ConnectionManager>
         using CancellationTokenSource connectCts = new();
         _gameServerDisconnectCts = new CancellationTokenSource();
 
-        TcpSendMessageToMasterServer("1;");
+        TcpSendMessageToMasterServer("0;");
 
         NetworkService.StartTcpLoopAsync(_masterTcpSocket, OnMasterServerMessageReceived, OnMasterServerDisconnected, connectCts.Token);
 

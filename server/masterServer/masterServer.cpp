@@ -10,6 +10,7 @@
 #include "common/utils.hpp"
 #include "common/connectionService.hpp"
 #include "outgoingMessages.hpp"
+#include "incomingMessages.hpp"
 
 #include <fcntl.h>
 
@@ -30,7 +31,24 @@ bool isGameServerActive;
 bool isGameServerActivating;
 
 void ctrl_c(int);
-void handleMsgStartGame(Player& player, const char* del);
+void handleMsgStartGame(Player& player, const incomingPlayerMessages::StartGameMessage& message);
+
+void handleServerStartedMessage(const incomingGameServerMessages::GameServerStarted& message) {
+    gameServerData.isStarted = true;
+    gameServerData.tcpPort = message.tcpPort;
+
+    printf("[MasterServer] Game server started on port: %d\n", message.tcpPort);
+
+    for(auto player : playersWaitingForServer){
+        // ToDo: Send also IpAddress
+        outgoingMessages::GameServerInfo serverInfoMessage { .tcpPort = message.tcpPort };
+        printf("[MasterServer] Send game server info to player: %d\n", player->id);
+        connectionService.sendTcpMessageTo(*player->connection, serverInfoMessage);
+    }
+    playersWaitingForServer.clear();
+    isGameServerActivating = false;
+    isGameServerActive = true;
+}
 
 std::vector<std::string_view> split(std::string_view s, char delim) {
     std::vector<std::string_view> result;
@@ -49,37 +67,28 @@ void sendPlayerCountMessageToAll(){
 }
 
 void onNewServerMessage(const Connection& connection, const std::string& message) {
-    // if(!connectionToServerMap.contains(&connection)) {
-    //     printf("Received onNewServerMessage from unknown connection\n");
-    //     return;
-    // }
-    // GameServerData& gameServer = connectionToServerMap[&connection];
+    using namespace incomingGameServerMessages;
+
     printf("[MasterServer] Received message from game server: %s\n", message.c_str());
 
-    if(!isGameServerActivating){
-        printf("[MasterServer] Received message from game server but no game server is activating\n");
-        return;
-    }
-
     auto messageParts = split(message, ';');
+    Type messageType = (Type)std::stoi(messageParts[0].data());
 
-    int tcpPort = atoi(messageParts[1].data());
+    switch (messageType){
+        case Type::ServerStarted: {
+            GameServerStarted startedMessage;
 
-    gameServerData.isStarted = true;
-    gameServerData.tcpPort = tcpPort;
-
-    // gameServer.OnServerStarted(tcpPort);
-    printf("[MasterServer] Game server started on port: %d\n", tcpPort);
-
-    for(auto player : playersWaitingForServer){
-        // ToDo: Send also IpAddress
-        outgoingMessages::GameServerInfo serverInfoMessage { .tcpPort = tcpPort };
-        printf("[MasterServer] Send game server info to player: %d\n", player->id);
-        connectionService.sendTcpMessageTo(*player->connection, serverInfoMessage);
+            if(!startedMessage.TryParse(messageParts)){
+                printf("[MasterServer] Failed to parse GameServerStarted: %s\n", message.c_str());
+                return;
+            }
+            handleServerStartedMessage(startedMessage);
+            break;
+        }
+        default:
+            printf("[MasterServer] Unknown message type from game server: %d Message: %s\n", (int)messageType, message.c_str());
+            break;
     }
-    playersWaitingForServer.clear();
-    isGameServerActivating = false;
-    isGameServerActive = true;
 }
 
 void onNewConnection(Connection& connection) {
@@ -96,29 +105,32 @@ void onNewConnection(Connection& connection) {
 }
 
 void onNewTcpMessage(const Connection& connection, const std::string& message) {
+    using namespace incomingPlayerMessages;
+
+
     if(!connectionToPlayerMap.contains(&connection)) {
         printf("[MasterServer] Received message from unknown connection\nSource: %d\nMessage: %s\n", connection.tcpFd, message.c_str());
         return;
     }
 
     Player& player = connectionToPlayerMap[&connection];
-    
-    std::vector<char> msgBuf(message.begin(), message.end());
-    msgBuf.push_back('\0');
 
-    const char* del = ";";
-    char *t = strtok(msgBuf.data(), del);
-    
-    if (!t) return;
-
-    char messageType = t[0];
+    auto messageParts = split(message, ';');
+    Type messageType = (Type)std::stoi(messageParts[0].data());
 
     switch (messageType){
-        case '1':
-            handleMsgStartGame(player, del);
+        case Type::StartGame: {
+            StartGameMessage startGameMessage;
+
+            if(!startGameMessage.TryParse(messageParts)){
+                printf("[MasterServer] Failed to parse StartGameMessage: %s\n", message.c_str());
+                return;
+            }
+            handleMsgStartGame(player, startGameMessage);
             break;
+        }
         default:
-            printf("Received unknown message\n");
+            printf("[MasterServer] Unknown message type from player: %d Message: %s\n", (int)messageType, message.c_str());
             break;
     }
 }
@@ -219,7 +231,7 @@ void startGameServer(){
     printf("[MasterServer] Started game server. FD: %d GameServerFD: %d\n", sv[0], sv[1]);
 }
 
-void handleMsgStartGame(Player& player, const char* del){
+void handleMsgStartGame(Player& player, const incomingPlayerMessages::StartGameMessage& message) {
     printf("[MasterServer] Handling start game message for player %d\n", player.id);
     if(isGameServerActive){
         outgoingMessages::GameServerInfo gameServerInfoMessage { .tcpPort = gameServerData.tcpPort };
