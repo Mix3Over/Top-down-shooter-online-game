@@ -4,4 +4,5 @@
 - Silnik Gry (Klient): Unity 6000.6.6f1
 - System Wejścia: Unity InputSystem
 - Architektura Sieciowa / Serwer: Dedykowany serwer (C++)
-- Protokół Sieciowy: QUIC (Quick UDP Internet Connections)
+- Biblioteka do komunikacji sieciowej: GameNetworkingSockets - https://github.com/ValveSoftware/GameNetworkingSockets
+- Biblioteka do async/await w Unity: UniTask - https://github.com/cysharp/unitask
