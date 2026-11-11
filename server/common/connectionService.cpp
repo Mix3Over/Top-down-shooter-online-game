@@ -232,11 +232,7 @@ void ConnectionService::closeAllConnections() {
     close(udpFd);
 }
 
-void ConnectionService::sendTcpMessageTo(const Connection& connection, std::string& message, bool addMessageEndChar) {
-    if(addMessageEndChar){
-        message += messageEndChar;
-    }
-
+void ConnectionService::sendTcpMessageTo(const Connection& connection, const std::string& message) {
     printf("[ConnectionService] Sending message to connection: %d, message: %s\n", connection.tcpFd, message.c_str());
     if (message.size() != send(connection.tcpFd, message.c_str(), message.size() , MSG_DONTWAIT))
     {
@@ -245,44 +241,15 @@ void ConnectionService::sendTcpMessageTo(const Connection& connection, std::stri
     }
 }
 
-void ConnectionService::sendTcpMessageToAllExcept(const Connection& connectionToSkip, std::string& message){
-    message += messageEndChar;
-
-    for(auto [fd, connection] : fdToConnection){
-        if(connection == connectionToSkip){
-            continue;
-        }
-        sendTcpMessageTo(connection, message, false);
-    }
-}
-
-void ConnectionService::sendTcpMessageToAll(std::string& message){
-    message += messageEndChar;
-
-    for(auto [fd, connection] : fdToConnection)
-        sendTcpMessageTo(connection, message, false);
-}
-
-void ConnectionService::sendUdpMessageTo(const Connection& connection, std::string& message, bool addMessageEndChar) {
+void ConnectionService::sendUdpMessageTo(const Connection& connection, const std::string& message) {
     if(!connection.isUdpInitialized){
         return;
-    }
-
-    if(addMessageEndChar){
-        message += messageEndChar;
     }
 
     if (message.size() != sendto(udpFd, message.c_str(), message.size(), 0, (sockaddr *)&connection.udpAddress, sizeof(connection.udpAddress)))
     {
         printf("Write failed on UDP socket\n");
     }
-}
-        
-void ConnectionService::sendUdpMessageToAll(std::string& message){
-    message += messageEndChar;
-
-    for(auto [fd, connection] : fdToConnection)
-        sendUdpMessageTo(connection, message, false);
 }
 
 void ConnectionService::handleUdpMessages(){

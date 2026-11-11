@@ -48,20 +48,55 @@ class ConnectionService {
             void(*onNewUdpMessage)(char* messageBuffer)
         );
 
-        void listenForEvents(int timeout);  
-        
-        void sendTcpMessageTo(const Connection& connection, std::string& message, bool addMessageEndChar = true);
-        void sendTcpMessageToAllExcept(const Connection& connectionToSkip, std::string& message);
-        void sendTcpMessageToAll(std::string& message);
+        void listenForEvents(int timeout);
 
-        void sendUdpMessageTo(const Connection& connection, std::string& message, bool addMessageEndChar = true);
-        void sendUdpMessageToAll(std::string& message);
         int getUdpPort() const;
         int getTcpPort() const;
 
         void closeAllConnections();
 
         Connection& createConnection(int fd, void(*onNewMessage)(const Connection& connection, const std::string& message), sockaddr_in udpAddress, bool isAdditional);
+
+        template <typename MessageType>
+        void sendTcpMessageTo(const Connection& connection, MessageType& message){
+            const std::string builtMessage = message.Build() + messageEndChar;
+            sendTcpMessageTo(connection, builtMessage);
+        }
+
+        template <typename MessageType>
+        void sendTcpMessageToAllExcept(const Connection& connectionToSkip, MessageType& message){
+            const std::string builtMessage = message.Build() + messageEndChar;
+
+            for(auto [fd, connection] : fdToConnection){
+                if(connection == connectionToSkip){
+                    continue;
+                }
+
+                sendTcpMessageTo(connection, builtMessage);
+            }
+        }
+
+        template <typename MessageType>
+        void sendTcpMessageToAll(MessageType& message){
+            const std::string builtMessage = message.Build() + messageEndChar;
+
+            for(auto [fd, connection] : fdToConnection)
+                sendTcpMessageTo(connection, builtMessage);
+        }
+
+        template <typename MessageType>
+        void sendUdpMessageTo(const Connection& connection, MessageType& message){
+            const std::string builtMessage = message.Build() + messageEndChar;
+            sendUdpMessageTo(connection, builtMessage);
+        }
+
+        template <typename MessageType>
+        void sendUdpMessageToAll(MessageType& message){
+            const std::string builtMessage = message.Build() + messageEndChar;
+
+            for(auto [fd, connection] : fdToConnection)
+                sendUdpMessageTo(connection, builtMessage);
+        }
 
     private:
         static const char messageEndChar = '~';
@@ -88,4 +123,7 @@ class ConnectionService {
         void handleUdpMessages();
         void closeConnection(int connectionFd);
         void handleDisconnect(const Connection& connection);
+
+        void sendTcpMessageTo(const Connection& connection, const std::string& message);
+        void sendUdpMessageTo(const Connection& connection, const std::string& message);
 };

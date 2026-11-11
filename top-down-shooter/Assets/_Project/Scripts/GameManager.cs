@@ -288,7 +288,7 @@ public class GameManager : Singleton<GameManager>
 
     private void OnUdpMessageReceived(string message)
     {
-        string[] playersData = message.TrimStart('M', ';').Split("!");
+        string[] playersData = message.TrimStart('9', ';').Split("!");
 
         foreach (string playerData in playersData) {
             if(playerData == string.Empty)

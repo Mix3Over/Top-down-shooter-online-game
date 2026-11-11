@@ -9,25 +9,10 @@
 #include "gameServerData.hpp"
 #include "common/utils.hpp"
 #include "common/connectionService.hpp"
-#include "common/messageBuilder.hpp"
-#include "common/GameType.hpp"
+#include "outgoingMessages.hpp"
 
 #include <fcntl.h>
 
-enum class SendMessage {
-    Init,
-    Heartbeat,
-    PlayerCount,
-    GameServerInfo,
-    MessageTypeCount  // Must be last, used to count message types
-};
-
-enum class ReceiveMessage {
-    Init,
-    StartGame
-};
-
-const MessageBuilder messageBuilder((int)SendMessage::MessageTypeCount);
 ConnectionService connectionService;
 
 int heartbeatInterval = 1000;
@@ -47,6 +32,17 @@ bool isGameServerActivating;
 void ctrl_c(int);
 void handleMsgStartGame(Player& player, const char* del);
 
+std::vector<std::string_view> split(std::string_view s, char delim) {
+    std::vector<std::string_view> result;
+    size_t start = 0, pos;
+    while ((pos = s.find(delim, start)) != std::string_view::npos) {
+        result.push_back(s.substr(start, pos - start));
+        start = pos + 1;
+    }
+    result.push_back(s.substr(start));
+    return result;
+}
+
 void sendPlayerCountMessageToAll(){
     // std::string playerCountMessage = messageBuilder.createMessage((int)SendMessage::PlayerCount, idToPlayer.size());
     // connectionService.sendTcpMessageToAll(playerCountMessage);
@@ -65,7 +61,9 @@ void onNewServerMessage(const Connection& connection, const std::string& message
         return;
     }
 
-    int tcpPort = atoi(message.c_str());
+    auto messageParts = split(message, ';');
+
+    int tcpPort = atoi(messageParts[1].data());
 
     gameServerData.isStarted = true;
     gameServerData.tcpPort = tcpPort;
@@ -75,7 +73,7 @@ void onNewServerMessage(const Connection& connection, const std::string& message
 
     for(auto player : playersWaitingForServer){
         // ToDo: Send also IpAddress
-        std::string serverInfoMessage = messageBuilder.createMessage((int)SendMessage::GameServerInfo, tcpPort);
+        outgoingMessages::GameServerInfo serverInfoMessage { .tcpPort = tcpPort };
         printf("[MasterServer] Send game server info to player: %d\n", player->id);
         connectionService.sendTcpMessageTo(*player->connection, serverInfoMessage);
     }
@@ -89,10 +87,9 @@ void onNewConnection(Connection& connection) {
     Player& newPlayer = connectionToPlayerMap[&connection];
     idToPlayer[newPlayer.id] = &newPlayer;
 
-    std::string initMessage = messageBuilder.createMessage((int)SendMessage::Init, newPlayer.id);
-
+    outgoingMessages::PlayerInit playerInitMessage { .playerId = newPlayer.id };
     printf("[MasterServer] New player connected: %d, tcpFd: %d\n", newPlayer.id, newPlayer.connection->tcpFd);
-    connectionService.sendTcpMessageTo(*newPlayer.connection, initMessage);
+    connectionService.sendTcpMessageTo(*newPlayer.connection, playerInitMessage);
     printf("[MasterServer] Init message sent to player: %d, tcpFd: %d\n", newPlayer.id, newPlayer.connection->tcpFd);
 
     sendPlayerCountMessageToAll();
@@ -190,9 +187,6 @@ int main(int argc, char **argv) {
 }
 
 void ctrl_c(int) {
-    std::string quitMsg = "[Master Server shutting down]";
-    connectionService.sendTcpMessageToAll(quitMsg);
-
     connectionService.closeAllConnections();
 
     printf("[MasterServer] Closing server\n");
@@ -228,9 +222,9 @@ void startGameServer(){
 void handleMsgStartGame(Player& player, const char* del){
     printf("[MasterServer] Handling start game message for player %d\n", player.id);
     if(isGameServerActive){
-        std::string serverInfoMessage = messageBuilder.createMessage((int)SendMessage::GameServerInfo, gameServerData.tcpPort);
-        printf("[MasterServer] Sending game server info to player %d. Message: %s\n", player.id, serverInfoMessage.c_str());
-        connectionService.sendTcpMessageTo(*player.connection, serverInfoMessage);
+        outgoingMessages::GameServerInfo gameServerInfoMessage { .tcpPort = gameServerData.tcpPort };
+        printf("[MasterServer] Sending game server info to player %d. Message: %s\n", player.id, gameServerInfoMessage.Build().c_str());
+        connectionService.sendTcpMessageTo(*player.connection, gameServerInfoMessage);
         return;
     }
 
