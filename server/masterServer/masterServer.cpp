@@ -10,6 +10,7 @@
 #include "common/utils.hpp"
 #include "common/connectionService.hpp"
 #include "common/messageBuilder.hpp"
+#include "common/GameType.hpp"
 
 #include <fcntl.h>
 
