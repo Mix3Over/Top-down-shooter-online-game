@@ -1,0 +1,684 @@
+[11.11.2026 11:39:41,44] START 
+STEP 1 OK: C++ tools at C:\Program Files\Microsoft Visual Studio\18\Community 
+STEP 2: cloning vcpkg 
+Cloning into 'C:\dev\vcpkg'...
+Updating files:   6% (968/14570)Updating files:   7% (1020/14570)Updating files:   8% (1166/14570)Updating files:   9% (1312/14570)Updating files:  10% (1457/14570)Updating files:  11% (1603/14570)Updating files:  12% (1749/14570)Updating files:  13% (1895/14570)Updating files:  14% (2040/14570)Updating files:  15% (2186/14570)Updating files:  16% (2332/14570)Updating files:  17% (2477/14570)Updating files:  18% (2623/14570)Updating files:  18% (2738/14570)Updating files:  19% (2769/14570)Updating files:  20% (2914/14570)Updating files:  21% (3060/14570)Updating files:  22% (3206/14570)Updating files:  23% (3352/14570)Updating files:  24% (3497/14570)Updating files:  25% (3643/14570)Updating files:  26% (3789/14570)Updating files:  27% (3934/14570)Updating files:  28% (4080/14570)Updating files:  29% (4226/14570)Updating files:  30% (4371/14570)Updating files:  31% (4517/14570)Updating files:  32% (4663/14570)Updating files:  33% (4809/14570)Updating files:  34% (4954/14570)Updating files:  35% (5100/14570)Updating files:  35% (5214/14570)Updating files:  36% (5246/14570)Updating files:  37% (5391/14570)Updating files:  38% (5537/14570)Updating files:  39% (5683/14570)Updating files:  40% (5828/14570)Updating files:  41% (5974/14570)Updating files:  42% (6120/14570)Updating files:  43% (6266/14570)Updating files:  44% (6411/14570)Updating files:  45% (6557/14570)Updating files:  46% (6703/14570)Updating files:  47% (6848/14570)Updating files:  48% (6994/14570)Updating files:  49% (7140/14570)Updating files:  50% (7285/14570)Updating files:  51% (7431/14570)Updating files:  51% (7513/14570)Updating files:  52% (7577/14570)Updating files:  53% (7723/14570)Updating files:  54% (7868/14570)Updating files:  55% (8014/14570)Updating files:  56% (8160/14570)Updating files:  57% (8305/14570)Updating files:  58% (8451/14570)Updating files:  58% (8458/14570)Updating files:  59% (8597/14570)Updating files:  60% (8742/14570)Updating files:  61% (8888/14570)Updating files:  62% (9034/14570)Updating files:  63% (9180/14570)Updating files:  64% (9325/14570)Updating files:  65% (9471/14570)Updating files:  65% (9504/14570)Updating files:  66% (9617/14570)Updating files:  67% (9762/14570)Updating files:  68% (9908/14570)Updating files:  69% (10054/14570)Updating files:  70% (10199/14570)Updating files:  71% (10345/14570)Updating files:  72% (10491/14570)Updating files:  72% (10559/14570)Updating files:  73% (10637/14570)Updating files:  74% (10782/14570)Updating files:  75% (10928/14570)Updating files:  76% (11074/14570)Updating files:  77% (11219/14570)Updating files:  78% (11365/14570)Updating files:  79% (11511/14570)Updating files:  79% (11570/14570)Updating files:  80% (11656/14570)Updating files:  81% (11802/14570)Updating files:  82% (11948/14570)Updating files:  83% (12094/14570)Updating files:  84% (12239/14570)Updating files:  85% (12385/14570)Updating files:  86% (12531/14570)Updating files:  87% (12676/14570)Updating files:  88% (12822/14570)Updating files:  88% (12823/14570)Updating files:  89% (12968/14570)Updating files:  90% (13113/14570)Updating files:  91% (13259/14570)Updating files:  92% (13405/14570)Updating files:  93% (13551/14570)Updating files:  94% (13696/14570)Updating files:  95% (13842/14570)Updating files:  96% (13988/14570)Updating files:  96% (14038/14570)Updating files:  97% (14133/14570)Updating files:  98% (14279/14570)Updating files:  99% (14425/14570)Updating files: 100% (14570/14570)Updating files: 100% (14570/14570), done.
+Note: switching to '279bdb886599ba2007ca407f87ec6292bc85b34f'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 279bdb8865 [atomic-queue] update to 1.9.0 (#51444)
+STEP 2 OK 
+Downloading https://github.com/microsoft/vcpkg-tool/releases/download/2026-04-08/vcpkg.exe -> C:\dev\vcpkg\vcpkg.exe... done.
+Validating signature... done.
+
+vcpkg package management program version 2026-04-08-e0612b42ce44e55a0e630f2ee9d3c533a63d8bc1
+
+See LICENSE.txt for license information.
+STEP 3 OK 
+STEP 4: building gamenetworkingsockets - this takes 20-40 minutes 
+Computing installation plan...
+A suitable version of cmake was not found (required v4.2.3).
+Downloading https://github.com/Kitware/CMake/releases/download/v4.2.3/cmake-4.2.3-windows-x86_64.zip -> cmake-4.2.3-windows-x86_64.zip
+Successfully downloaded cmake-4.2.3-windows-x86_64.zip
+Extracting cmake...
+A suitable version of 7zip was not found (required v26.0.0).
+Downloading https://github.com/ip7z/7zip/releases/download/26.00/7z2600-x64.exe -> 7z2600-x64.7z.exe
+Successfully downloaded 7z2600-x64.7z.exe
+Extracting 7zip...
+A suitable version of 7zr was not found (required v26.0.0).
+Downloading https://github.com/ip7z/7zip/releases/download/26.00/7zr.exe -> a30f8a21-7zr.exe
+Successfully downloaded a30f8a21-7zr.exe
+The following packages will be built and installed:
+  * abseil:x64-windows@20260107.1#2
+    gamenetworkingsockets:x64-windows@1.4.1#2
+  * openssl:x64-windows@3.6.2
+  * protobuf:x64-windows@6.33.4#1
+  * utf8-range:x64-windows@6.33.4
+  * vcpkg-cmake:x64-windows@2024-04-23
+  * vcpkg-cmake-config:x64-windows@2024-05-23
+  * vcpkg-cmake-get-vars:x64-windows@2025-05-29
+Additional packages (*) will be modified to complete this operation.
+Detecting compiler hash for triplet x64-windows...
+A suitable version of powershell-core was not found (required v7.5.4).
+Downloading https://github.com/PowerShell/PowerShell/releases/download/v7.5.4/PowerShell-7.5.4-win-x64.zip -> PowerShell-7.5.4-win-x64.zip
+Successfully downloaded PowerShell-7.5.4-win-x64.zip
+Extracting powershell-core...
+Compiler found: C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/cl.exe
+Restored 0 package(s) from C:\Users\PC\AppData\Local\vcpkg\archives in 446 us. Use --debug to see more details.
+Installing 1/8 vcpkg-cmake:x64-windows@2024-04-23...
+vcpkg-cmake:x64-windows@2024-04-23 package ABI: bb305e16ae89a7e1886fa8c4f867f82461dc6022a88e0441ce9816880d570b61
+Building vcpkg-cmake:x64-windows@2024-04-23...
+-- Installing: C:/dev/vcpkg/packages/vcpkg-cmake_x64-windows/share/vcpkg-cmake/vcpkg_cmake_configure.cmake
+-- Installing: C:/dev/vcpkg/packages/vcpkg-cmake_x64-windows/share/vcpkg-cmake/vcpkg_cmake_build.cmake
+-- Installing: C:/dev/vcpkg/packages/vcpkg-cmake_x64-windows/share/vcpkg-cmake/vcpkg_cmake_install.cmake
+-- Installing: C:/dev/vcpkg/packages/vcpkg-cmake_x64-windows/share/vcpkg-cmake/vcpkg-port-config.cmake
+-- Installing: C:/dev/vcpkg/packages/vcpkg-cmake_x64-windows/share/vcpkg-cmake/copyright
+-- Performing post-build validation
+Starting submission of vcpkg-cmake:x64-windows@2024-04-23 to 1 binary cache(s) in the background
+Elapsed time to handle vcpkg-cmake:x64-windows: 179 ms
+Installing 2/8 vcpkg-cmake-config:x64-windows@2024-05-23...
+vcpkg-cmake-config:x64-windows@2024-05-23 package ABI: c319685f7bf27fb1588d9a868fc699bb6f2b6d2c66960fc66669b28ba09daf20
+Building vcpkg-cmake-config:x64-windows@2024-05-23...
+-- Installing: C:/dev/vcpkg/packages/vcpkg-cmake-config_x64-windows/share/vcpkg-cmake-config/vcpkg_cmake_config_fixup.cmake
+-- Installing: C:/dev/vcpkg/packages/vcpkg-cmake-config_x64-windows/share/vcpkg-cmake-config/vcpkg-port-config.cmake
+-- Installing: C:/dev/vcpkg/packages/vcpkg-cmake-config_x64-windows/share/vcpkg-cmake-config/copyright
+-- Skipping post-build validation due to VCPKG_POLICY_EMPTY_PACKAGE
+Starting submission of vcpkg-cmake-config:x64-windows@2024-05-23 to 1 binary cache(s) in the background
+Elapsed time to handle vcpkg-cmake-config:x64-windows: 125 ms
+Completed submission of vcpkg-cmake:x64-windows@2024-04-23 to 1 binary cache(s) in 108 ms
+Installing 3/8 abseil:x64-windows@20260107.1#2...
+abseil:x64-windows@20260107.1#2 package ABI: ea5aa29952f6a84f76403fbb180879c802249ce96561a947d2fd315249b6f7fd
+Building abseil:x64-windows@20260107.1#2...
+Downloading https://github.com/abseil/abseil-cpp/archive/20260107.1.tar.gz -> abseil-abseil-cpp-20260107.1.tar.gz
+Successfully downloaded abseil-abseil-cpp-20260107.1.tar.gz
+-- Extracting source C:/dev/vcpkg/downloads/abseil-abseil-cpp-20260107.1.tar.gz
+-- Applying patch 003-force-cxx-17.patch
+-- Applying patch fix-heterogeneous_lookup_testing-target.patch
+-- Applying patch fix-mingw-dll.patch
+-- Using source at C:/dev/vcpkg/buildtrees/abseil/src/20260107.1-5fb939345e.clean
+-- Configuring x64-windows
+-- Building x64-windows-dbg
+-- Building x64-windows-rel
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/abseil_dll.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_absl_check.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_absl_log.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_absl_vlog_is_on.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_algorithm.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_algorithm_container.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_any.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_any_invocable.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_atomic_hook.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_bad_any_cast.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_bad_optional_access.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_bad_variant_access.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_base.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_base_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_bind_front.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_bits.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_borrowed_fixup_buffer.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_bounded_utf8_length_sequence.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_btree.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_charset.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_check.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_chunked_queue.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_city.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_civil_time.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_cleanup.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_cleanup_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_common_policy_traits.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_compare.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_compressed_tuple.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_config.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_constexpr_testing_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_container_common.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_container_memory.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_cord.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_cord_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_cordz_functions.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_cordz_handle.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_cordz_info.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_cordz_sample_token.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_cordz_statistics.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_cordz_update_scope.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_cordz_update_tracker.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_core_headers.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_crc32c.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_crc_cord_state.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_crc_cpu_detect.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_crc_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_debugging.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_debugging_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_decode_rust_punycode.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_demangle_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_demangle_rust.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_die_if_null.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_dynamic_annotations.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_endian.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_errno_saver.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_examine_stack.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_exponential_biased.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_failure_signal_handler.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_fast_type_id.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_fixed_array.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_flags.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_flags_commandlineflag.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_flags_commandlineflag_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_flags_config.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_flags_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_flags_marshalling.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_flags_parse.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_flags_path_util.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_flags_private_handle_accessor.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_flags_program_name.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_flags_reflection.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_flags_usage.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_flags_usage_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_flat_hash_map.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_flat_hash_set.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_function_ref.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_generic_printer_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_graphcycles_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_has_ostream_operator.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_hash.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_hash_container_defaults.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_hash_function_defaults.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_hash_policy_traits.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_hashtable_control_bytes.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_hashtable_debug.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_hashtable_debug_hooks.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_hashtable_profiler.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_hashtablez_sampler.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_inlined_vector.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_inlined_vector_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_int128.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_iterator_traits_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_iterator_traits_test_helper_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_kernel_timeout_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_layout.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_leak_check.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_linked_hash_map.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_linked_hash_set.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_entry.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_flags.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_globals.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_initialize.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_append_truncated.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_check_impl.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_check_op.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_conditions.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_config.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_container.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_flags.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_fnmatch.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_format.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_globals.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_log_impl.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_log_sink_set.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_message.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_nullguard.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_nullstream.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_proto.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_strip.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_structured.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_structured_proto.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_internal_voidify.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_severity.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_sink.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_sink_registry.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_streamer.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_log_structured.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_malloc_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_memory.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_meta.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_no_destructor.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_node_hash_map.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_node_hash_set.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_node_slot_policy.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_non_temporal_arm_intrinsics.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_non_temporal_memcpy.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_nullability.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_nullability_traits_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_numeric.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_numeric_representation.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_optional.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_overload.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_periodic_sampler.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_poison.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_prefetch.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_pretty_function.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_profile_builder.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_bit_gen_ref.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_distributions.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_distribution_caller.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_distribution_test_util.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_entropy_pool.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_fast_uniform_bits.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_fastmath.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_generate_real.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_iostream_state_saver.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_mock_helpers.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_nonsecure_base.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_pcg_engine.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_platform.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_randen.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_randen_engine.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_randen_hwaes.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_randen_hwaes_impl.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_randen_slow.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_salted_seed_seq.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_seed_material.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_traits.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_uniform_helper.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_internal_wide_multiply.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_random.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_seed_gen_exception.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_random_seed_sequences.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_raw_hash_map.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_raw_hash_set.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_raw_hash_set_resize_impl.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_raw_logging_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_requires_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_sample_recorder.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_scoped_set_env.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_span.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_spinlock_wait.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_stacktrace.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_status.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_statusor.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_str_format.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_str_format_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_strerror.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_string_view.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_strings.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_strings_append_and_overwrite.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_strings_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_strings_resize_and_overwrite.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_symbolize.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_synchronization.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_throw_delegate.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_time.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_time_zone.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_tracing_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_type_traits.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_utf8_for_code_point.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_utility.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_variant.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_vlog_config_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_vlog_is_on.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/lib/pkgconfig/absl_weakly_mixed_integer.pc
+Downloading msys2-mingw-w64-x86_64-pkgconf-1~2.5.1-1-any.pkg.tar.zst, trying https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-pkgconf-1~2.5.1-1-any.pkg.tar.zst
+Successfully downloaded msys2-mingw-w64-x86_64-pkgconf-1~2.5.1-1-any.pkg.tar.zst
+Downloading msys2-msys2-runtime-3.6.5-1-x86_64.pkg.tar.zst, trying https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.6.5-1-x86_64.pkg.tar.zst
+Successfully downloaded msys2-msys2-runtime-3.6.5-1-x86_64.pkg.tar.zst
+-- Using msys root at C:/dev/vcpkg/downloads/tools/msys2/3e71d1f8e22ab23f
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/abseil_dll.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_absl_check.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_absl_log.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_absl_vlog_is_on.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_algorithm.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_algorithm_container.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_any.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_any_invocable.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_atomic_hook.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_bad_any_cast.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_bad_optional_access.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_bad_variant_access.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_base.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_base_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_bind_front.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_bits.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_borrowed_fixup_buffer.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_bounded_utf8_length_sequence.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_btree.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_charset.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_check.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_chunked_queue.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_city.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_civil_time.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_cleanup.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_cleanup_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_common_policy_traits.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_compare.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_compressed_tuple.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_config.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_constexpr_testing_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_container_common.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_container_memory.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_cord.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_cord_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_cordz_functions.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_cordz_handle.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_cordz_info.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_cordz_sample_token.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_cordz_statistics.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_cordz_update_scope.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_cordz_update_tracker.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_core_headers.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_crc32c.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_crc_cord_state.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_crc_cpu_detect.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_crc_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_debugging.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_debugging_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_decode_rust_punycode.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_demangle_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_demangle_rust.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_die_if_null.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_dynamic_annotations.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_endian.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_errno_saver.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_examine_stack.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_exponential_biased.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_failure_signal_handler.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_fast_type_id.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_fixed_array.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_flags.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_flags_commandlineflag.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_flags_commandlineflag_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_flags_config.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_flags_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_flags_marshalling.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_flags_parse.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_flags_path_util.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_flags_private_handle_accessor.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_flags_program_name.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_flags_reflection.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_flags_usage.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_flags_usage_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_flat_hash_map.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_flat_hash_set.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_function_ref.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_generic_printer_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_graphcycles_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_has_ostream_operator.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_hash.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_hash_container_defaults.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_hash_function_defaults.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_hash_policy_traits.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_hashtable_control_bytes.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_hashtable_debug.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_hashtable_debug_hooks.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_hashtable_profiler.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_hashtablez_sampler.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_inlined_vector.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_inlined_vector_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_int128.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_iterator_traits_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_iterator_traits_test_helper_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_kernel_timeout_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_layout.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_leak_check.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_linked_hash_map.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_linked_hash_set.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_entry.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_flags.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_globals.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_initialize.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_append_truncated.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_check_impl.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_check_op.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_conditions.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_config.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_container.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_flags.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_fnmatch.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_format.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_globals.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_log_impl.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_log_sink_set.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_message.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_nullguard.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_nullstream.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_proto.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_strip.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_structured.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_structured_proto.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_internal_voidify.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_severity.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_sink.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_sink_registry.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_streamer.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_log_structured.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_malloc_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_memory.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_meta.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_no_destructor.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_node_hash_map.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_node_hash_set.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_node_slot_policy.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_non_temporal_arm_intrinsics.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_non_temporal_memcpy.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_nullability.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_nullability_traits_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_numeric.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_numeric_representation.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_optional.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_overload.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_periodic_sampler.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_poison.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_prefetch.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_pretty_function.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_profile_builder.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_bit_gen_ref.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_distributions.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_distribution_caller.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_distribution_test_util.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_entropy_pool.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_fast_uniform_bits.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_fastmath.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_generate_real.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_iostream_state_saver.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_mock_helpers.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_nonsecure_base.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_pcg_engine.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_platform.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_randen.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_randen_engine.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_randen_hwaes.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_randen_hwaes_impl.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_randen_slow.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_salted_seed_seq.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_seed_material.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_traits.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_uniform_helper.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_internal_wide_multiply.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_random.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_seed_gen_exception.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_random_seed_sequences.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_raw_hash_map.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_raw_hash_set.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_raw_hash_set_resize_impl.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_raw_logging_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_requires_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_sample_recorder.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_scoped_set_env.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_span.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_spinlock_wait.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_stacktrace.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_status.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_statusor.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_str_format.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_str_format_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_strerror.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_string_view.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_strings.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_strings_append_and_overwrite.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_strings_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_strings_resize_and_overwrite.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_symbolize.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_synchronization.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_throw_delegate.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_time.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_time_zone.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_tracing_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_type_traits.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_utf8_for_code_point.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_utility.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_variant.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_vlog_config_internal.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_vlog_is_on.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/abseil_x64-windows/debug/lib/pkgconfig/absl_weakly_mixed_integer.pc
+-- Installing: C:/dev/vcpkg/packages/abseil_x64-windows/share/abseil/copyright
+-- Performing post-build validation
+Starting submission of abseil:x64-windows@20260107.1#2 to 1 binary cache(s) in the background
+Elapsed time to handle abseil:x64-windows: 1.2 min
+Completed submission of vcpkg-cmake-config:x64-windows@2024-05-23 to 1 binary cache(s) in 107 ms
+Installing 4/8 vcpkg-cmake-get-vars:x64-windows@2025-05-29...
+vcpkg-cmake-get-vars:x64-windows@2025-05-29 package ABI: 9a7a83c3b5eb984076996f5cbb5e16b2e1a4a2b6595849a8d1f72610823e3471
+Building vcpkg-cmake-get-vars:x64-windows@2025-05-29...
+-- Installing: C:/dev/vcpkg/packages/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/vcpkg_cmake_get_vars.cmake
+-- Installing: C:/dev/vcpkg/packages/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/cmake_get_vars
+-- Installing: C:/dev/vcpkg/packages/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/cmake_get_vars/CMakeLists.txt
+-- Installing: C:/dev/vcpkg/packages/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/cmake-get-vars.cmake.in
+-- Installing: C:/dev/vcpkg/packages/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/vcpkg-port-config.cmake
+-- Installing: C:/dev/vcpkg/packages/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/copyright
+-- Performing post-build validation
+Starting submission of vcpkg-cmake-get-vars:x64-windows@2025-05-29 to 1 binary cache(s) in the background
+Elapsed time to handle vcpkg-cmake-get-vars:x64-windows: 140 ms
+Installing 5/8 openssl:x64-windows@3.6.2...
+openssl:x64-windows@3.6.2 package ABI: d98a03d6b5c272603f1569876b166774c183e6575f4f62eab769cb7bb8ed76ee
+Building openssl:x64-windows@3.6.2...
+Downloading https://github.com/openssl/openssl/archive/openssl-3.6.2.tar.gz -> openssl-openssl-openssl-3.6.2.tar.gz
+Successfully downloaded openssl-openssl-openssl-3.6.2.tar.gz
+-- Extracting source C:/dev/vcpkg/downloads/openssl-openssl-openssl-3.6.2.tar.gz
+-- Applying patch cmake-config.patch
+-- Applying patch command-line-length.patch
+-- Applying patch script-prefix.patch
+-- Applying patch windows/install-layout.patch
+-- Applying patch windows/install-pdbs.patch
+-- Applying patch windows/install-programs.diff
+-- Applying patch unix/android-cc.patch
+-- Applying patch unix/move-openssldir.patch
+-- Applying patch unix/no-empty-dirs.patch
+-- Applying patch unix/no-static-libs-for-shared.patch
+-- Using source at C:/dev/vcpkg/buildtrees/openssl/src/nssl-3.6.2-a98581e5a0.clean
+-- Getting CMake variables for x64-windows
+-- Loading CMake variables from C:/dev/vcpkg/buildtrees/openssl/cmake-get-vars_C_CXX-x64-windows.cmake.log
+Downloading https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_54221_64bit/strawberry-perl-5.42.2.1-64bit-portable.zip -> strawberry-perl-5.42.2.1-64bit-portable.zip
+Successfully downloaded strawberry-perl-5.42.2.1-64bit-portable.zip
+Downloading nasm-3.01-win64.zip, trying https://www.nasm.us/pub/nasm/releasebuilds/3.01/win64/nasm-3.01-win64.zip
+Successfully downloaded nasm-3.01-win64.zip
+-- Getting CMake variables for x64-windows
+Downloading jom_1_1_7.zip, trying https://download.qt.io/official_releases/jom/jom_1_1_7.zip
+Successfully downloaded jom_1_1_7.zip
+-- Prerunning x64-windows-dbg
+-- Building x64-windows-dbg
+-- Prerunning x64-windows-rel
+-- Building x64-windows-rel
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/openssl_x64-windows/lib/pkgconfig/libcrypto.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/openssl_x64-windows/lib/pkgconfig/libssl.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/openssl_x64-windows/lib/pkgconfig/openssl.pc
+-- Using cached msys2-mingw-w64-x86_64-pkgconf-1~2.5.1-1-any.pkg.tar.zst
+-- Using cached msys2-msys2-runtime-3.6.5-1-x86_64.pkg.tar.zst
+-- Using msys root at C:/dev/vcpkg/downloads/tools/msys2/3e71d1f8e22ab23f
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/openssl_x64-windows/debug/lib/pkgconfig/libcrypto.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/openssl_x64-windows/debug/lib/pkgconfig/libssl.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/openssl_x64-windows/debug/lib/pkgconfig/openssl.pc
+-- Installing: C:/dev/vcpkg/packages/openssl_x64-windows/share/openssl/usage
+-- Installing: C:/dev/vcpkg/packages/openssl_x64-windows/share/openssl/copyright
+-- Performing post-build validation
+Starting submission of openssl:x64-windows@3.6.2 to 1 binary cache(s) in the background
+Elapsed time to handle openssl:x64-windows: 7.6 min
+Completed submission of abseil:x64-windows@20260107.1#2 to 1 binary cache(s) in 1.6 s
+Completed submission of vcpkg-cmake-get-vars:x64-windows@2025-05-29 to 1 binary cache(s) in 49.8 ms
+Installing 6/8 utf8-range:x64-windows@6.33.4...
+utf8-range:x64-windows@6.33.4 package ABI: f364e4a3a3b499b959df92af94b0bc2ed6d737c32b6dbd300ee3992c8008103e
+Building utf8-range:x64-windows@6.33.4...
+-- Note: utf8-range only supports static library linkage. Building static library.
+Downloading https://github.com/protocolbuffers/protobuf/archive/v33.4.tar.gz -> protocolbuffers-protobuf-v33.4.tar.gz
+Successfully downloaded protocolbuffers-protobuf-v33.4.tar.gz
+-- Extracting source C:/dev/vcpkg/downloads/protocolbuffers-protobuf-v33.4.tar.gz
+-- Applying patch fix-cmake.patch
+-- Using source at C:/dev/vcpkg/buildtrees/utf8-range/src/v33.4-7b17d08241.clean
+-- Configuring x64-windows
+-- Building x64-windows-dbg
+-- Building x64-windows-rel
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/utf8-range_x64-windows/lib/pkgconfig/utf8_range.pc
+-- Using cached msys2-mingw-w64-x86_64-pkgconf-1~2.5.1-1-any.pkg.tar.zst
+-- Using cached msys2-msys2-runtime-3.6.5-1-x86_64.pkg.tar.zst
+-- Using msys root at C:/dev/vcpkg/downloads/tools/msys2/3e71d1f8e22ab23f
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/utf8-range_x64-windows/debug/lib/pkgconfig/utf8_range.pc
+-- Installing: C:/dev/vcpkg/packages/utf8-range_x64-windows/share/utf8-range/copyright
+-- Performing post-build validation
+Starting submission of utf8-range:x64-windows@6.33.4 to 1 binary cache(s) in the background
+Elapsed time to handle utf8-range:x64-windows: 6.6 s
+Completed submission of openssl:x64-windows@3.6.2 to 1 binary cache(s) in 1.7 s
+Installing 7/8 protobuf:x64-windows@6.33.4#1...
+protobuf:x64-windows@6.33.4#1 package ABI: 224251cc74b662fecc8b920b3dde73ed1e3e63f6e15d31af2d243c1e064345c2
+Building protobuf:x64-windows@6.33.4#1...
+-- Using cached protocolbuffers-protobuf-v33.4.tar.gz
+-- Extracting source C:/dev/vcpkg/downloads/protocolbuffers-protobuf-v33.4.tar.gz
+-- Applying patch fix-static-build.patch
+-- Applying patch fix-default-proto-file-path.patch
+-- Applying patch fix-utf8-range.patch
+-- Applying patch fix-install-dirs.patch
+-- Applying patch fix-constinit-with-clang-cl.patch
+-- Applying patch fix-upb.patch
+-- Using source at C:/dev/vcpkg/buildtrees/protobuf/src/v33.4-f8b43d71cd.clean
+-- Configuring x64-windows
+-- Building x64-windows-dbg
+-- Building x64-windows-rel
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/protobuf_x64-windows/lib/pkgconfig/protobuf-lite.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/protobuf_x64-windows/lib/pkgconfig/protobuf.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/protobuf_x64-windows/lib/pkgconfig/upb.pc
+-- Using cached msys2-mingw-w64-x86_64-pkgconf-1~2.5.1-1-any.pkg.tar.zst
+-- Using cached msys2-msys2-runtime-3.6.5-1-x86_64.pkg.tar.zst
+-- Using msys root at C:/dev/vcpkg/downloads/tools/msys2/3e71d1f8e22ab23f
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/protobuf_x64-windows/debug/lib/pkgconfig/protobuf-lite.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/protobuf_x64-windows/debug/lib/pkgconfig/protobuf.pc
+-- Fixing pkgconfig file: C:/dev/vcpkg/packages/protobuf_x64-windows/debug/lib/pkgconfig/upb.pc
+-- Installing: C:/dev/vcpkg/packages/protobuf_x64-windows/share/protobuf/copyright
+-- Performing post-build validation
+Starting submission of protobuf:x64-windows@6.33.4#1 to 1 binary cache(s) in the background
+Elapsed time to handle protobuf:x64-windows: 12 min
+Completed submission of utf8-range:x64-windows@6.33.4 to 1 binary cache(s) in 70.1 ms
+Installing 8/8 gamenetworkingsockets:x64-windows@1.4.1#2...
+gamenetworkingsockets:x64-windows@1.4.1#2 package ABI: 76fba36426a1f416a5296c9445fab0b7cdbd236f1b6437fa08b2f19743d0a674
+Building gamenetworkingsockets:x64-windows@1.4.1#2...
+Downloading https://github.com/ValveSoftware/GameNetworkingSockets/archive/505c697d0abef5da2ff3be35aa4ea3687597c3e9.tar.gz -> ValveSoftware-GameNetworkingSockets-505c697d0abef5da2ff3be35aa4ea3687597c3e9.tar.gz
+Successfully downloaded ValveSoftware-GameNetworkingSockets-505c697d0abef5da2ff3be35aa4ea3687597c3e9.tar.gz
+-- Extracting source C:/dev/vcpkg/downloads/ValveSoftware-GameNetworkingSockets-505c697d0abef5da2ff3be35aa4ea3687597c3e9.tar.gz
+-- Applying patch fix-depend-protobuf.patch
+-- Applying patch protobuf-6.patch
+-- Using source at C:/dev/vcpkg/buildtrees/gamenetworkingsockets/src/687597c3e9-e7c7710060.clean
+-- Configuring x64-windows
+-- Building x64-windows-dbg
+-- Building x64-windows-rel
+-- Using cached msys2-mingw-w64-x86_64-pkgconf-1~2.5.1-1-any.pkg.tar.zst
+-- Using cached msys2-msys2-runtime-3.6.5-1-x86_64.pkg.tar.zst
+-- Using msys root at C:/dev/vcpkg/downloads/tools/msys2/3e71d1f8e22ab23f
+-- Installing: C:/dev/vcpkg/packages/gamenetworkingsockets_x64-windows/share/gamenetworkingsockets/copyright
+-- Performing post-build validation
+Starting submission of gamenetworkingsockets:x64-windows@1.4.1#2 to 1 binary cache(s) in the background
+Elapsed time to handle gamenetworkingsockets:x64-windows: 1.3 min
+Total install time: 23 min
+Installed contents are licensed to you by owners. Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
+Packages installed in this vcpkg installation declare the following licenses:
+Apache-2.0
+BSD-3-Clause
+MIT
+gamenetworkingsockets provides CMake targets:
+
+  # this is heuristically generated, and may not be correct
+  find_package(GameNetworkingSockets CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE GameNetworkingSockets::shared GameNetworkingSockets::static GameNetworkingSockets::GameNetworkingSockets GameNetworkingSockets::GameNetworkingSockets_s)
+
+Completed submission of protobuf:x64-windows@6.33.4#1 to 1 binary cache(s) in 38 s
+Waiting for 1 remaining binary cache submissions...
+Completed submission of gamenetworkingsockets:x64-windows@1.4.1#2 to 1 binary cache(s) in 5.1 s (1/1)
+All requested installations completed successfully in: 23 min
+STEP 4 OK 
+C:\dev\vcpkg\installed\x64-windows\bin\abseil_dll.dll
+C:\dev\vcpkg\installed\x64-windows\bin\GameNetworkingSockets.dll
+C:\dev\vcpkg\installed\x64-windows\bin\legacy.dll
+C:\dev\vcpkg\installed\x64-windows\bin\libcrypto-3-x64.dll
+C:\dev\vcpkg\installed\x64-windows\bin\libprotobuf-lite.dll
+C:\dev\vcpkg\installed\x64-windows\bin\libprotobuf.dll
+C:\dev\vcpkg\installed\x64-windows\bin\libprotoc.dll
+C:\dev\vcpkg\installed\x64-windows\bin\libssl-3-x64.dll
+        8 file(s) copied.
+abseil_dll.dll
+GameNetworkingSockets.dll
+legacy.dll
+libcrypto-3-x64.dll
+libprotobuf-lite.dll
+libprotobuf.dll
+libprotoc.dll
+libssl-3-x64.dll
+[11.11.2026 12:03:38,20] DONE 
