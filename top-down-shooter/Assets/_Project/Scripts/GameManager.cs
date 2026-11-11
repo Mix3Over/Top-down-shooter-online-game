@@ -40,13 +40,9 @@ public class GameManager : Singleton<GameManager>
 
     private readonly Dictionary<int, Player> _players = new ();
     private readonly Dictionary<int, Bullet> _bullets = new ();
-    public GameType SelectedGameType {get; set;} = GameType.FFA;
 
-public void SetGameType(int gameTypeIndex)
-{
-    SelectedGameType = (GameType)gameTypeIndex;
-    Debug.Log("Wybrano tryb gry: " + SelectedGameType);
-}
+    [field: SerializeField]
+    public GameType SelectedGameType {get; private set;} = GameType.FFA;
 
     private void Start()
     {
@@ -66,6 +62,12 @@ public void SetGameType(int gameTypeIndex)
         ConnectionManager.Instance.UdpMessageReceived -= OnUdpMessageReceived;
     }
 
+    public void SetGameType(int gameTypeIndex)
+    {
+        SelectedGameType = (GameType)gameTypeIndex;
+        Debug.Log("Wybrano tryb gry: " + SelectedGameType);
+    }
+
     public void SpawnLocalPlayer(int playerTypeIndex)
     {
         UIManager.Instance.LeaderboardUI.Open();
@@ -76,7 +78,7 @@ public void SetGameType(int gameTypeIndex)
             $"{UIManager.Instance.LobbyUI.PlayerName};" +
             $"{playerTypeIndex};{playerTypeData.BulletDamage};" +
             $"{playerTypeData.BulletSpeed};" +
-            $"{playerTypeData.StartingHealth};" + 
+            $"{playerTypeData.StartingHealth};" +
             $"{(int)SelectedGameType};");
     }
 

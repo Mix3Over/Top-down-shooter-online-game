@@ -48,7 +48,7 @@ public class LobbyUI : UIWindow
 
     public void SelectGameModeAndContinue(int gameTypeIndex)
     {
-        GameManager.Instance.SelectedGameType = (GameType)gameTypeIndex;
+        GameManager.Instance.SetGameType(gameTypeIndex);
         Debug.Log("Selected game mode:" + GameManager.Instance.SelectedGameType);
 
         OnJoinButton();
