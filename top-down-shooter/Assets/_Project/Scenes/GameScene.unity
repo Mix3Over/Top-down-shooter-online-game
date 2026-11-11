@@ -171,6 +171,7 @@ MonoBehaviour:
   _playerPrefab: {fileID: 2620728765045908974, guid: 981ce9a95441fec4eb4f476cf339dbea, type: 3}
   _bulletPrefab: {fileID: 4877249051015923298, guid: 640709fc18cd4f548833893988682679, type: 3}
   _playersParent: {fileID: 565471282}
+  <SelectedGameType>k__BackingField: 1
 --- !u!1 &115336735
 GameObject:
   m_ObjectHideFlags: 0

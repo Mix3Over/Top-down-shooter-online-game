@@ -13,6 +13,7 @@ public class InputManager : Singleton<InputManager>
     private InputActionMap _gameplayActionMap;
     private InputAction _lookAction;
     private InputAction _moveAction;
+    private InputAction _shootAction;
 
     protected override void Awake()
     {
@@ -21,10 +22,10 @@ public class InputManager : Singleton<InputManager>
         _gameplayActionMap = _inputActionAsset.FindActionMap("Gameplay", true);
         _lookAction = InputSystem.actions.FindAction("Look");
         _moveAction = InputSystem.actions.FindAction("Move");
-        InputAction shootAction = InputSystem.actions.FindAction("Attack");
+        _shootAction = InputSystem.actions.FindAction("Attack");
 
         _lookAction.performed += _ => MousePositionChanged?.Invoke(_lookAction.ReadValue<Vector2>());
-        shootAction.performed += _ => ShootingPerformed?.Invoke();
+        
     }
 
     private void Update()
@@ -33,6 +34,9 @@ public class InputManager : Singleton<InputManager>
 
         if (move != Vector2.zero)
             PlayerMoved?.Invoke(_moveAction.ReadValue<Vector2>());
+
+        if (_shootAction.IsPressed())
+        ShootingPerformed?.Invoke();    
     }
 
     private void OnEnable()

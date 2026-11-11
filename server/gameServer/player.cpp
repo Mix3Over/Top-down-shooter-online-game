@@ -15,6 +15,7 @@ void Player::Initialize(int udpPort, std::string name, int type, int damage, int
     this->damage = damage;
     this->health = hp;
     this->bulletSpeed = bulletSpeed;
+    this->points = 0;
 
     this->isInitialized = true;
     this->isAlive = true;

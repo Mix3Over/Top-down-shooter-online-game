@@ -9,7 +9,7 @@
 #include "common/utils.hpp"
 #include "common/connectionService.hpp"
 #include "common/messageBuilder.hpp"
-
+#include "common/GameType.hpp"
 #include "player.hpp"
 #include "bullet.hpp"
 
@@ -43,6 +43,8 @@ int tickCount = 0;
 int nextPlayerID = 0;
 int nextBulletID = 0;
 
+GameType currentGameType = GameType::FFA;
+
 std::unordered_map<int, Bullet> idToBullet;
 std::unordered_map<int, Player*> idToPlayer;
 std::unordered_map<const Connection*, Player> connectionToPlayerMap;
@@ -52,6 +54,8 @@ void handleMsgShoot(Player& player, const char* del);
 
 void onNewMasterServerMessage(const Connection& connection, const std::string& message) {
     printf("[G] Received message from master server: %s\n", message.c_str());
+    int mode = atoi(message.c_str());
+    printf("[G] Game mode set to: %d\n", (int)currentGameType);
 }
 
 void onNewConnection(Connection& connection) {
@@ -155,6 +159,12 @@ void handleMsgInit(Player& player, const char* del) {
     t = strtok(nullptr, del);
     int hp = atoi(t);
 
+    t = strtok(nullptr, del);
+    if (t != nullptr){
+        currentGameType = (GameType)atoi(t);
+        printf("[GameServer] Selected game type: %d\n", (int)currentGameType);
+    }
+
     player.Initialize(playerUdpPort, name, type, damage, bulletSpeed, hp);
     printf("[GameServer] Player initialized: %d\n", player.isAlive);
 
@@ -248,6 +258,7 @@ void bulletsUpdate(int deltaTime) {
                     idToPlayer[player->id]->isAlive = false;
                     idToPlayer[bulletData.playerId]->points += 100;
                     idToPlayer[player->id]->health = 0;
+                    idToPlayer[player->id]->points = 0;
                 }
 
                 std::string hitMessage = messageBuilder.createMessage((int)SendMessage::PlayerHit,
@@ -289,7 +300,7 @@ void updatePlayersScore(){
 
     std::string records;
     for(const auto& [id, player] : idToPlayer){
-        if(!player->isAlive)
+        if(!player->isInitialized)
             continue;
         records += messageBuilder.createRecord(id, player->points);
     }
