@@ -10,25 +10,9 @@
 #include "common/connectionService.hpp"
 #include "common/GameType.hpp"
 #include "outgoingMessages.hpp"
+#include "incomingMessages.hpp"
 #include "player.hpp"
 #include "bullet.hpp"
-
-enum class SendMessage {
-    Init,
-    InitLocalPlayer,
-    InitPlayers,
-    AddRemotePlayer,
-    RemoveRemotePlayer,
-    BulletSpawn,
-    PlayerHit,
-    RemoveBullet,
-    PlayerScores,
-};
-
-enum class ReceiveMessage {
-    Init,
-    StartGame
-};
 
 ConnectionService connectionService;
 Connection* masterServerConnection;
@@ -47,13 +31,45 @@ std::unordered_map<int, Bullet> idToBullet;
 std::unordered_map<int, Player*> idToPlayer;
 std::unordered_map<const Connection*, Player> connectionToPlayerMap;
 
-void handleMsgInit(Player& player, const char* del);
-void handleMsgShoot(Player& player, const char* del);
+void handleMsgInit(Player& player, const incomingPlayerMessages::InitMessage& message);
+void handleMsgShoot(Player& player, const incomingPlayerMessages::ShootMessage& message);
+void handleMsgUdpUpdate(const incomingPlayerMessages::UDP_UpdateMessage& message);
+void handleSetGameModeMessage(const incomingMasterServerMessages::SetGameModeMessage& message);
+
+std::vector<std::string_view> split(std::string_view s, char delim) {
+    std::vector<std::string_view> result;
+    size_t start = 0, pos;
+    while ((pos = s.find(delim, start)) != std::string_view::npos) {
+        result.push_back(s.substr(start, pos - start));
+        start = pos + 1;
+    }
+    result.push_back(s.substr(start));
+    return result;
+}
 
 void onNewMasterServerMessage(const Connection& connection, const std::string& message) {
+    using namespace incomingMasterServerMessages;
+
     printf("[GameServer] Received message from master server: %s\n", message.c_str());
-    int mode = atoi(message.c_str());
-    printf("[GameServer] Game mode set to: %d\n", (int)currentGameType);
+
+    auto messageParts = split(message, fieldSeparator);
+    Type messageType = (Type)std::stoi(messageParts[0].data());
+
+    switch (messageType){
+        case Type::SetGameMode: {
+            SetGameModeMessage setGameModeMessage;
+
+            if(!setGameModeMessage.TryParse(messageParts)){
+                printf("[GameServer] Failed to parse SetGameModeMessage: %s\n", message.c_str());
+                return;
+            }
+            handleSetGameModeMessage(setGameModeMessage);
+            break;
+        }
+        default:
+            printf("[GameServer] Unknown message type from master server: %d Message: %s\n", (int)messageType, message.c_str());
+            break;
+    }
 }
 
 void onNewConnection(Connection& connection) {
@@ -70,64 +86,66 @@ void onNewConnection(Connection& connection) {
 }
 
 void onNewTcpMessage(const Connection& connection, const std::string& message) {
+    using namespace incomingPlayerMessages;
+
     if(!connectionToPlayerMap.contains(&connection)) {
         printf("[GameServer] Received message from unknown connection\nSource: %d\nMessage: %s\n", connection.tcpFd, message.c_str());
         return;
     }
 
     Player& player = connectionToPlayerMap[&connection];
-    
-    std::vector<char> msgBuf(message.begin(), message.end());
-    msgBuf.push_back('\0');
 
-    const char* del = ";";
-    char *t = strtok(msgBuf.data(), del);
-    
-    if (!t) return;
-
-    char messageType = t[0];
+    auto messageParts = split(message, fieldSeparator);
+    Type messageType = (Type)std::stoi(messageParts[0].data());
 
     switch (messageType){
-        case 'I':
-            handleMsgInit(player, del);
+        case Type::Init: {
+            InitMessage initMessage;
+
+            if(!initMessage.TryParse(messageParts)){
+                printf("[GameServer] Failed to parse InitMessage: %s\n", message.c_str());
+                return;
+            }
+            handleMsgInit(player, initMessage);
             break;
-        case 'S':
-            handleMsgShoot(player, del);
+        }
+        case Type::Shoot: {
+            ShootMessage shootMessage;
+
+            if(!shootMessage.TryParse(messageParts)){
+                printf("[GameServer] Failed to parse ShootMessage: %s\n", message.c_str());
+                return;
+            }
+            handleMsgShoot(player, shootMessage);
             break;
+        }
         default:
-            printf("[GameServer] Unknown message type: %c\n", messageType);
+            printf("[GameServer] Unknown message type from player: %d Message: %s\n", (int)messageType, message.c_str());
             break;
     }
 }
 
 void onNewUdpMessage(char* messageBuffer) {
-    const char *del = ";";
-    int playerId, positionX, positionY, rotation;
+    using namespace incomingPlayerMessages;
 
-    char *t = strtok(messageBuffer, del);
+    auto messageParts = split(messageBuffer, fieldSeparator);
+    Type messageType = (Type)std::stoi(messageParts[0].data());
 
-    if(t == nullptr)       
-        return;        
-    playerId = atoi(t);
-    t = strtok(nullptr, del);
+    switch (messageType){
+        case Type::UDP_Update: {
+            UDP_UpdateMessage udpUpdateMessage;
 
-    if(t == nullptr)       
-        return;        
-    positionX = atoi(t);
-    t = strtok(nullptr, del);
-
-    if(t == nullptr)       
-        return;        
-    positionY = atoi(t);
-    t = strtok(nullptr, del);
-
-    if(t == nullptr)       
-        return;        
-    rotation = atoi(t);
-
-    idToPlayer[playerId]->positionX = positionX;
-    idToPlayer[playerId]->positionY = positionY;
-    idToPlayer[playerId]->rotation = rotation;
+            if(!udpUpdateMessage.TryParse(messageParts)){
+                printf("[GameServer] Failed to parse UDP_UpdateMessage: %s\n", messageBuffer);
+                return;
+            }
+            handleMsgUdpUpdate(udpUpdateMessage);
+            break;
+        }
+        default:
+            printf("[GameServer] Unknown UDP message type: %d Message: %s\n", (int)messageType, messageBuffer);
+            break;
+    }
 }
 
 void onPlayerDisconnected(const Connection& connection) {
@@ -147,27 +165,22 @@ void onPlayerDisconnected(const Connection& connection) {
     connectionService.sendTcpMessageToAll(removeMessage);
 }
 
-void handleMsgInit(Player& player, const char* del) {
-    char *t = strtok(nullptr, del);
-    int playerUdpPort = atoi(t);
-    t = strtok(nullptr, del);
-    std::string name = std::string(t);
-    t = strtok(nullptr, del);
-    int type = atoi(t);
-    t = strtok(nullptr, del);
-    int damage = atoi(t);
-    t = strtok(nullptr, del);
-    int bulletSpeed = atoi(t);
-    t = strtok(nullptr, del);
-    int hp = atoi(t);
+void handleSetGameModeMessage(const incomingMasterServerMessages::SetGameModeMessage& message) {
+    currentGameType = (GameType)message.gameMode;
+    printf("[GameServer] Game mode set to: %d\n", (int)currentGameType);
+}
 
-    t = strtok(nullptr, del);
-    if (t != nullptr){
-        currentGameType = (GameType)atoi(t);
-        printf("[GameServer] Selected game type: %d\n", (int)currentGameType);
-    }
+void handleMsgUdpUpdate(const incomingPlayerMessages::UDP_UpdateMessage& message) {
+    idToPlayer[message.playerId]->positionX = message.positionX;
+    idToPlayer[message.playerId]->positionY = message.positionY;
+    idToPlayer[message.playerId]->rotation = message.rotation;
+}
 
-    player.Initialize(playerUdpPort, name, type, damage, bulletSpeed, hp);
+void handleMsgInit(Player& player, const incomingPlayerMessages::InitMessage& message) {
+    currentGameType = (GameType)message.gameType;
+    printf("[GameServer] Selected game type: %d\n", (int)currentGameType);
+
+    player.Initialize(message.udpPort, message.name, message.type, message.damage, message.bulletSpeed, message.hp);
     printf("[GameServer] Player initialized: %d\n", player.isAlive);
 
     outgoingMessages::InitLocalPlayer initMessage{ .positionX = player.positionX, .positionY = player.positionY };
@@ -202,23 +215,16 @@ void handleMsgInit(Player& player, const char* del) {
     connectionService.sendTcpMessageToAll(addPlayerMessage);
 }
 
-void handleMsgShoot(Player& player, const char* del) {
-    char *t = strtok(nullptr, del);
-    int positionX = atoi(t);
-    t = strtok(nullptr, del);
-    int positionY = atoi(t);
-    t = strtok(nullptr, del);
-    int rotation = atoi(t);
-
+void handleMsgShoot(Player& player, const incomingPlayerMessages::ShootMessage& message) {
     if(!player.isAlive)
         return;
     
     Bullet bulletData {
         .id = nextBulletID++,
         .playerId = player.id,
-        .positionX = positionX,
-        .positionY = positionY,
-        .direction = rotation,
+        .positionX = message.positionX,
+        .positionY = message.positionY,
+        .direction = message.rotation,
         .speed = player.bulletSpeed,
         .lifetime = bulletLifetime,
         .damage = player.damage
@@ -226,7 +232,7 @@ void handleMsgShoot(Player& player, const char* del) {
 
     idToBullet[bulletData.id] = bulletData;
 
-    printf("[GameServer] Player %d shot bullet %d at (%d, %d) with rotation %d\n", player.id, bulletData.id, positionX, positionY, rotation);
+    printf("[GameServer] Player %d shot bullet %d at (%d, %d) with rotation %d\n", player.id, bulletData.id, message.positionX, message.positionY, message.rotation);
     
     outgoingMessages::BulletSpawn shootMessage{ 
         .id = bulletData.id, 

@@ -129,7 +129,12 @@ void ConnectionService::handleTcpMessage(epoll_event& ee) {
         connection.inputBuffer.erase(0, pos + 1);
 
         if(connection.onNewMessage != nullptr){
-            connection.onNewMessage(connection, message);
+            try{
+                connection.onNewMessage(connection, message);
+            }
+            catch(const std::exception& e){
+                printf("Error occurred while handling TCP message: %s\n Error: %s\n", buffer, e.what());
+            }
         }
     }
 }
@@ -267,7 +272,12 @@ void ConnectionService::handleUdpMessages(){
         }
         
         if(onNewUdpMessage != nullptr){
-            onNewUdpMessage(buffer);
+            try{
+                onNewUdpMessage(buffer);
+            }
+            catch(const std::exception& e){
+                printf("Error occurred while handling UDP message: %s\n Error: %s\n", buffer, e.what());
+            }
         }
     }
 }

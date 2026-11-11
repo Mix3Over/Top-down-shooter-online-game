@@ -13,7 +13,7 @@ public enum GameType
 }
 public class GameManager : Singleton<GameManager>
 {
-    public enum MessageType
+    public enum IncomingMessageType
     {
         ServerInfo,
         InitLocalPlayer,
@@ -24,6 +24,13 @@ public class GameManager : Singleton<GameManager>
         PlayerHit,
         RemoveBullet,
         PlayerScores
+    }
+
+    public enum OutgoingMessageType
+    {
+        Init,
+        Shoot,
+        UpdUpdate
     }
 
     public static event Action PlayerScoresUpdated;
@@ -72,7 +79,7 @@ public class GameManager : Singleton<GameManager>
         UIManager.Instance.LeaderboardUI.Open();
         PlayerTypeData playerTypeData = _playerTypes[playerTypeIndex];
         ConnectionManager.Instance.TcpSendMessageToGameServer(
-            $"I;" +
+            $"{(int)OutgoingMessageType.Init};" +
             $"{ConnectionManager.Instance.UdpLocalPort};" +
             $"{UIManager.Instance.LobbyUI.PlayerName};" +
             $"{playerTypeIndex};{playerTypeData.BulletDamage};" +
@@ -93,29 +100,29 @@ public class GameManager : Singleton<GameManager>
         string trimmedMessage = message[1..].Trim(';');
         int.TryParse(parts[0], out int messageType);
 
-        switch ((MessageType)messageType) {
-            case MessageType.InitLocalPlayer:
+        switch ((IncomingMessageType)messageType) {
+            case IncomingMessageType.InitLocalPlayer:
                 InitLocalPlayer(trimmedMessage);
                 break;
-            case MessageType.InitPlayers:
+            case IncomingMessageType.InitPlayers:
                 InitPlayers(trimmedMessage);
                 break;
-            case MessageType.AddRemotePlayer:
+            case IncomingMessageType.AddRemotePlayer:
                 AddRemotePlayer(trimmedMessage);
                 break;
-            case MessageType.RemoveRemotePlayer:
+            case IncomingMessageType.RemoveRemotePlayer:
                 RemovePlayer(trimmedMessage);
                 break;
-            case MessageType.BulletSpawn:
+            case IncomingMessageType.BulletSpawn:
                 SpawnBullet(trimmedMessage);
                 break;
-            case MessageType.PlayerHit:
+            case IncomingMessageType.PlayerHit:
                 PlayerHit(trimmedMessage);
                 break;
-            case MessageType.RemoveBullet:
+            case IncomingMessageType.RemoveBullet:
                 RemoveBullet(trimmedMessage);
                 break;
-            case MessageType.PlayerScores:
+            case IncomingMessageType.PlayerScores:
                 UpdatePlayerScores(trimmedMessage);
                 break;
         }

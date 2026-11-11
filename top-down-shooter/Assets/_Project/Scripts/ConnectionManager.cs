@@ -159,7 +159,7 @@ public class ConnectionManager : Singleton<ConnectionManager>
         string message = await NetworkService.WaitForMessageAsync(_gameTcpSocket, connectCts.Token);
         string[] messageParts = message.Trim('~').Split(';');
 
-        if (messageParts.Length != 3 || !int.TryParse(messageParts[0], out int messageType) || messageType != (int)GameManager.MessageType.ServerInfo) {
+        if (messageParts.Length != 3 || !int.TryParse(messageParts[0], out int messageType) || messageType != (int)GameManager.IncomingMessageType.ServerInfo) {
             Debug.LogError("Incorrect ServerInfo message format: " +  message);
             return;
         }

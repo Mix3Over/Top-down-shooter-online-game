@@ -71,7 +71,7 @@ void onNewServerMessage(const Connection& connection, const std::string& message
 
     printf("[MasterServer] Received message from game server: %s\n", message.c_str());
 
-    auto messageParts = split(message, ';');
+    auto messageParts = split(message, fieldSeparator);
     Type messageType = (Type)std::stoi(messageParts[0].data());
 
     switch (messageType){
@@ -115,7 +115,7 @@ void onNewTcpMessage(const Connection& connection, const std::string& message) {
 
     Player& player = connectionToPlayerMap[&connection];
 
-    auto messageParts = split(message, ';');
+    auto messageParts = split(message, fieldSeparator);
     Type messageType = (Type)std::stoi(messageParts[0].data());
 
     switch (messageType){
