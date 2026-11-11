@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 using CreateSocketResult = NetworkService.CreateSocketResult;
@@ -27,6 +28,9 @@ public class ConnectionManager : Singleton<ConnectionManager>
     private CancellationTokenSource _gameServerDisconnectCts;
 
     private float _lastMessageReceivedTime;
+
+    private bool _receivedInitMessage;
+    private int? _gameServerPort;
 
     private void Start()
     {
@@ -108,25 +112,13 @@ public class ConnectionManager : Singleton<ConnectionManager>
         _gameServerDisconnectCts = new CancellationTokenSource();
 
         TcpSendMessageToMasterServer("1;");
-        string _ = await NetworkService.WaitForMessageAsync(_masterTcpSocket, connectCts.Token); // ToDo: Ignorujemy tutaj Init message od Master Server. Z tego wynika, że pewnie możemy ją na razie usunąć
-        string gameServerInfoMessage = await NetworkService.WaitForMessageAsync(_masterTcpSocket, connectCts.Token); // ToDO: Tu powinno być jakieś asynchroniczne oczekiwanie na odpowiednią wiadomość, bo możemy dostawać inne wiadomości
-        Debug.Log("Game server info message: " + gameServerInfoMessage);
-        string[] data = gameServerInfoMessage.Trim().TrimEnd('~').Split(";");
-        if (data.Length != 2)
-        {
-            Debug.Log($"Incorrect GameServerInfo message format. Message: {gameServerInfoMessage}");
-            DisconnectGameServer();
-            return;
-        }
 
-        if (!int.TryParse(data[1], out int port))
-        {
-            DisconnectGameServer();
-            Debug.Log($"Failed to parse port. Message: {gameServerInfoMessage}");
-            return;
-        }
+        NetworkService.StartTcpLoopAsync(_masterTcpSocket, OnMasterServerMessageReceived, OnMasterServerDisconnected, connectCts.Token);
 
-        Debug.Log($"Game server port {port}");
+        await UniTask.WaitWhile(() => _gameServerPort == null, cancellationToken: connectCts.Token);
+        int port = _gameServerPort!.Value;
+
+        Debug.Log($"GameServer port: {port}");
 
         // ToDo: IpAddress should be also sent by master server
         DebugConnectionConfig debugConnectionConfig = Resources.Load<DebugConnectionConfig>("DebugConnectionConfig");
@@ -236,6 +228,39 @@ public class ConnectionManager : Singleton<ConnectionManager>
             SceneLoader.OpenMainMenu();
 
         Debug.Log("Disconnected from GameServer");
+    }
+
+    private void OnMasterServerMessageReceived(string message)
+    {
+        if (!_receivedInitMessage)
+        {
+            _receivedInitMessage = true;
+            Debug.Log($"Received init message: {message}");
+
+            return;
+        }
+
+        string[] data = message.Trim().TrimEnd('~').Split(";");
+        if (data.Length != 2)
+        {
+            Debug.Log($"Incorrect GameServerInfo message format. Message: {message}");
+            DisconnectGameServer();
+            return;
+        }
+
+        if (!int.TryParse(data[1], out int port))
+        {
+            DisconnectGameServer();
+            Debug.Log($"Failed to parse port. Message: {message}");
+            return;
+        }
+        Debug.Log($"GameServer port: {port}");
+        _gameServerPort = port;
+    }
+
+    private void OnMasterServerDisconnected()
+    {
+        Debug.LogWarning("TODO: Handle disconnection from GameServer");
     }
 
     private void OnDestroy()
