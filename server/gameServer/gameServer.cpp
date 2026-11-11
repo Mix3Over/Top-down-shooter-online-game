@@ -93,7 +93,7 @@ void onNewTcpMessage(const Connection& connection, const std::string& message) {
             handleMsgShoot(player, del);
             break;
         default:
-            printf("[GS] Unknown message type: %c\n", messageType);
+            printf("[GameServer] Unknown message type: %c\n", messageType);
             break;
     }
 }
@@ -246,12 +246,12 @@ void bulletsUpdate(int deltaTime) {
                 
                 idToPlayer[player->id]->health -= bulletData.damage;
                 
-                printf("Player %d hit by bullet %d. Health: %d\n",
+                printf("[GameServer] Player %d hit by bullet %d. Health: %d\n",
                        player->id, bulletData.id, idToPlayer[player->id]->health);
 
                 
                 if (idToPlayer[player->id]->health <= 0) {
-                    printf("Player %d has died.\n", player->id);
+                    printf("[GameServer] Player %d has died.\n", player->id);
 
                     idToPlayer[player->id]->isAlive = false;
                     idToPlayer[bulletData.playerId]->points += 100;
@@ -314,8 +314,7 @@ void sendUpdateToPlayers(){
             continue;
         buffer = buffer + std::to_string(player->id) + ";" + std::to_string(player->positionX) + ";" + std::to_string(player->positionY) + ";" + std::to_string(player->rotation) + "!";
     }
-    buffer += "~";
-    
+
     connectionService.sendUdpMessageToAll(buffer);
 }
 
@@ -356,7 +355,7 @@ int main(int argc, char **argv) {
     );
 
     masterServerConnection = &connectionService.createConnection(masterServerFd, onNewMasterServerMessage, sockaddr_in{}, true);
-    std::string message = std::to_string(connectionService.getTcpPort()) + '~';
+    std::string message = std::to_string(connectionService.getTcpPort());
     printf("[GameServer] Sending message to master server: %s\n", message.c_str());
     connectionService.sendTcpMessageTo(*masterServerConnection, message);
 
@@ -381,11 +380,11 @@ int main(int argc, char **argv) {
 }
 
 void ctrl_c(int) {
-    const char quitMsg[] = "[Server shutting down. Bye!]\n";
+    std::string quitMsg = "[Game Server shutting down]";
     connectionService.sendTcpMessageToAll(quitMsg);
 
     connectionService.closeAllConnections();
 
-    printf("Closing server\n");
+    printf("[GameServer] Closing server\n");
     exit(0);
 }

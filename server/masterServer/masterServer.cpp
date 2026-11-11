@@ -190,12 +190,12 @@ int main(int argc, char **argv) {
 }
 
 void ctrl_c(int) {
-    const char quitMsg[] = "[Server shutting down. Bye!]\n";
+    std::string quitMsg = "[Master Server shutting down]";
     connectionService.sendTcpMessageToAll(quitMsg);
 
     connectionService.closeAllConnections();
 
-    printf("Closing server\n");
+    printf("[MasterServer] Closing server\n");
     exit(0);
 }
 
@@ -225,9 +225,11 @@ void startGameServer(){
     printf("[MasterServer] Started game server. FD: %d GameServerFD: %d\n", sv[0], sv[1]);
 }
 
-void handleMsgStartGame(Player& player, const char* del){   
+void handleMsgStartGame(Player& player, const char* del){
+    printf("[MasterServer] Handling start game message for player %d\n", player.id);
     if(isGameServerActive){
         std::string serverInfoMessage = messageBuilder.createMessage((int)SendMessage::GameServerInfo, gameServerData.tcpPort);
+        printf("[MasterServer] Sending game server info to player %d. Message: %s\n", player.id, serverInfoMessage.c_str());
         connectionService.sendTcpMessageTo(*player.connection, serverInfoMessage);
         return;
     }

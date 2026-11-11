@@ -50,12 +50,12 @@ class ConnectionService {
 
         void listenForEvents(int timeout);  
         
-        void sendTcpMessageTo(const Connection& connection, const std::string& message);
-        void sendTcpMessageToAllExcept(const Connection& connectionToSkip, const std::string& message);
-        void sendTcpMessageToAll(const std::string& message);
+        void sendTcpMessageTo(const Connection& connection, std::string& message, bool addMessageEndChar = true);
+        void sendTcpMessageToAllExcept(const Connection& connectionToSkip, std::string& message);
+        void sendTcpMessageToAll(std::string& message);
 
-        void sendUdpMessageTo(const Connection& connection, const std::string& message);
-        void sendUdpMessageToAll(const std::string& message);
+        void sendUdpMessageTo(const Connection& connection, std::string& message, bool addMessageEndChar = true);
+        void sendUdpMessageToAll(std::string& message);
         int getUdpPort() const;
         int getTcpPort() const;
 
@@ -64,6 +64,7 @@ class ConnectionService {
         Connection& createConnection(int fd, void(*onNewMessage)(const Connection& connection, const std::string& message), sockaddr_in udpAddress, bool isAdditional);
 
     private:
+        static const char messageEndChar = '~';
         
         int tcpFd = -1;
         int udpFd = -1;

@@ -5,8 +5,7 @@
 class MessageBuilder {
     public:
         const char fieldSeparator = ';';
-        const char recordEndChar  = '!';
-        const char messageEndChar = '~';
+        const char recordSeparator = '!';
 
         MessageBuilder(int messageTypesCount);
 
@@ -16,14 +15,14 @@ class MessageBuilder {
                 printf("To high message type index");
                 return "";
             }
-            return (std::to_string(messageType) + ... + (fieldSeparator + toStr(args))) + messageEndChar;
+            return (std::to_string(messageType) + ... + (fieldSeparator + toStr(args)));
         }
 
         template <typename... Args>
         std::string createRecord(Args&&... args) const {
             std::string result;
             ((result += toStr(args) + fieldSeparator), ...);
-            result.back() = recordEndChar;   // Replace last fieldSeparator with recordEndChar
+            result.back() = recordSeparator;   // Replace last fieldSeparator with recordEndChar
             return result;
         }
 

@@ -120,10 +120,11 @@ void ConnectionService::handleTcpMessage(epoll_event& ee) {
         return;
     }
 
+    printf("[ConnectionService] Received message from connection: %d, message: %.*s\n", connection.tcpFd, count, buffer);
     connection.inputBuffer += std::string(buffer, count);
 
     size_t pos = 0;
-    while ((pos = connection.inputBuffer.find('~')) != std::string::npos) {
+    while ((pos = connection.inputBuffer.find(messageEndChar)) != std::string::npos) {
         std::string message = connection.inputBuffer.substr(0, pos);
         connection.inputBuffer.erase(0, pos + 1);
 
@@ -231,31 +232,44 @@ void ConnectionService::closeAllConnections() {
     close(udpFd);
 }
 
-void ConnectionService::sendTcpMessageTo(const Connection& connection, const std::string& message){
-    if (message.size() != send(connection.tcpFd, message.c_str(), message.size(), MSG_DONTWAIT))
+void ConnectionService::sendTcpMessageTo(const Connection& connection, std::string& message, bool addMessageEndChar) {
+    if(addMessageEndChar){
+        message += messageEndChar;
+    }
+
+    printf("[ConnectionService] Sending message to connection: %d, message: %s\n", connection.tcpFd, message.c_str());
+    if (message.size() != send(connection.tcpFd, message.c_str(), message.size() , MSG_DONTWAIT))
     {
         printf("Write failed on %d\n", connection.tcpFd);
         handleDisconnect(connection);
     }
 }
 
-void ConnectionService::sendTcpMessageToAllExcept(const Connection& connectionToSkip, const std::string& message){
+void ConnectionService::sendTcpMessageToAllExcept(const Connection& connectionToSkip, std::string& message){
+    message += messageEndChar;
+
     for(auto [fd, connection] : fdToConnection){
         if(connection == connectionToSkip){
             continue;
         }
-        sendTcpMessageTo(connection, message);
+        sendTcpMessageTo(connection, message, false);
     }
 }
 
-void ConnectionService::sendTcpMessageToAll(const std::string& message){
+void ConnectionService::sendTcpMessageToAll(std::string& message){
+    message += messageEndChar;
+
     for(auto [fd, connection] : fdToConnection)
-        sendTcpMessageTo(connection, message);
+        sendTcpMessageTo(connection, message, false);
 }
 
-void ConnectionService::sendUdpMessageTo(const Connection& connection, const std::string& message){
+void ConnectionService::sendUdpMessageTo(const Connection& connection, std::string& message, bool addMessageEndChar) {
     if(!connection.isUdpInitialized){
         return;
+    }
+
+    if(addMessageEndChar){
+        message += messageEndChar;
     }
 
     if (message.size() != sendto(udpFd, message.c_str(), message.size(), 0, (sockaddr *)&connection.udpAddress, sizeof(connection.udpAddress)))
@@ -264,9 +278,11 @@ void ConnectionService::sendUdpMessageTo(const Connection& connection, const std
     }
 }
         
-void ConnectionService::sendUdpMessageToAll(const std::string& message){
+void ConnectionService::sendUdpMessageToAll(std::string& message){
+    message += messageEndChar;
+
     for(auto [fd, connection] : fdToConnection)
-        sendUdpMessageTo(connection, message);
+        sendUdpMessageTo(connection, message, false);
 }
 
 void ConnectionService::handleUdpMessages(){
