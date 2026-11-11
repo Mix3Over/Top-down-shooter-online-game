@@ -45,4 +45,12 @@ public class LobbyUI : UIWindow
     {
         _nameInputField.text = value.Replace('~', '.').Replace(':', '.').Replace(';', '.').Replace('!', '.');
     }
+
+    public void SelectGameModeAndContinue(int gameTypeIndex)
+    {
+        GameManager.Instance.SelectedGameType = (GameType)gameTypeIndex;
+        Debug.Log("Selected game mode:" + GameManager.Instance.SelectedGameType);
+
+        OnJoinButton();
+    }
 }

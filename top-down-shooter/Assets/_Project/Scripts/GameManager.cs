@@ -4,6 +4,14 @@ using System.Linq;
 using Unity.Cinemachine;
 using UnityEngine;
 
+public enum GameType
+{
+    FFA = 0,
+    Solo_Deathmatch = 1,
+    Solo_LastManStanding = 2,
+    Team_Deathmatch = 3,
+    Team_LastManStanding = 4
+}
 public class GameManager : Singleton<GameManager>
 {
     public enum MessageType
@@ -32,6 +40,13 @@ public class GameManager : Singleton<GameManager>
 
     private readonly Dictionary<int, Player> _players = new ();
     private readonly Dictionary<int, Bullet> _bullets = new ();
+    public GameType SelectedGameType {get; set;} = GameType.FFA;
+
+public void SetGameType(int gameTypeIndex)
+{
+    SelectedGameType = (GameType)gameTypeIndex;
+    Debug.Log("Wybrano tryb gry: " + SelectedGameType);
+}
 
     private void Start()
     {
@@ -61,7 +76,8 @@ public class GameManager : Singleton<GameManager>
             $"{UIManager.Instance.LobbyUI.PlayerName};" +
             $"{playerTypeIndex};{playerTypeData.BulletDamage};" +
             $"{playerTypeData.BulletSpeed};" +
-            $"{playerTypeData.StartingHealth};");
+            $"{playerTypeData.StartingHealth};" + 
+            $"{(int)SelectedGameType};");
     }
 
     private void OnTcpMessageReceived(string message)
@@ -196,6 +212,9 @@ public class GameManager : Singleton<GameManager>
             Debug.LogWarning($"Player with ID:{playerId} doesn't exist");
             return;
         }
+
+        player.SetScore(0);
+        PlayerScoresUpdated?.Invoke();
 
         Destroy(player.gameObject);
 
