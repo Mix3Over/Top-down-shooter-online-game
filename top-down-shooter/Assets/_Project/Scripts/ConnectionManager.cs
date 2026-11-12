@@ -10,8 +10,8 @@ using FailReason = NetworkService.FailReason;
 
 public class ConnectionManager : Singleton<ConnectionManager>
 {
-    public event Action<string> TcpMessageReceived;
-    public event Action<string> UdpMessageReceived;
+    public static event Action<string> TcpMessageReceived;
+    public static event Action<string> UdpMessageReceived;
 
     public int PlayerID { get; private set; }
     public bool IsConnected { get; private set; }

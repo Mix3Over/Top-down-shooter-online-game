@@ -58,14 +58,14 @@ public class GameManager : Singleton<GameManager>
 
     private void OnEnable()
     {
-        ConnectionManager.Instance.TcpMessageReceived += OnTcpMessageReceived;
-        ConnectionManager.Instance.UdpMessageReceived += OnUdpMessageReceived;
+        ConnectionManager.TcpMessageReceived += OnTcpMessageReceived;
+        ConnectionManager.UdpMessageReceived += OnUdpMessageReceived;
     }
 
     private void OnDisable()
     {
-        ConnectionManager.Instance.TcpMessageReceived -= OnTcpMessageReceived;
-        ConnectionManager.Instance.UdpMessageReceived -= OnUdpMessageReceived;
+        ConnectionManager.TcpMessageReceived -= OnTcpMessageReceived;
+        ConnectionManager.UdpMessageReceived -= OnUdpMessageReceived;
     }
 
     public void SetGameType(int gameTypeIndex)

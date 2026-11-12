@@ -9,9 +9,18 @@ public class ChatUI : MonoBehaviour
 
     private void Start()
     {
-        ConnectionManager.Instance.TcpMessageReceived += AddNewMessage;
         _messageInputField.onSubmit.AddListener(Send);
         _messagePrefab.SetActive(false);
+    }
+
+    private void OnEnable()
+    {
+        ConnectionManager.TcpMessageReceived += AddNewMessage;
+    }
+
+    private void OnDisable()
+    {
+        ConnectionManager.TcpMessageReceived -= AddNewMessage;
     }
 
     private void AddNewMessage(string message)
