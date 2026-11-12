@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ public enum GameType
     Team_Deathmatch = 3,
     Team_LastManStanding = 4
 }
+
 public class GameManager : Singleton<GameManager>
 {
     public enum IncomingMessageType
@@ -47,12 +49,14 @@ public class GameManager : Singleton<GameManager>
     private readonly Dictionary<int, Player> _players = new ();
     private readonly Dictionary<int, Bullet> _bullets = new ();
 
-    [field: SerializeField]
     public static GameType SelectedGameType {get; set;} = GameType.FFA;
 
-    private void Start()
+    private async void Start()
     {
         Application.targetFrameRate = 60;
+
+        await UniTask.WaitUntil(() => SceneLoader.IsUILoaded);
+
         UIManager.Instance.LobbyUI.Open();
     }
 
@@ -80,7 +84,7 @@ public class GameManager : Singleton<GameManager>
         PlayerTypeData playerTypeData = _playerTypes[playerTypeIndex];
         ConnectionManager.Instance.TcpSendMessageToGameServer(
             $"{(int)OutgoingMessageType.Init};" +
-            $"{ConnectionManager.Instance.UdpLocalPort};" +
+            $"{ConnectionManager.Instance.LocalUdpPort};" +
             $"{UIManager.Instance.LobbyUI.PlayerName};" +
             $"{playerTypeIndex};{playerTypeData.BulletDamage};" +
             $"{playerTypeData.BulletSpeed};" +

@@ -14,8 +14,12 @@ public class ConnectionManager : Singleton<ConnectionManager>
     public static event Action<string> UdpMessageReceived;
 
     public int PlayerID { get; private set; }
-    public bool IsConnected { get; private set; }
-    public int UdpLocalPort { get; private set; }
+    public int PlayerAccountID { get; private set; }
+
+    public bool IsConnectedToGameSever { get; private set; }
+    public bool IsConnectedToMasterServer { get; private set; }
+
+    public int LocalUdpPort { get; private set; }
 
     private const int TimeoutSeconds = 3;
 
@@ -24,36 +28,43 @@ public class ConnectionManager : Singleton<ConnectionManager>
 
     private UdpClient _udpClient;
 
-    private CancellationTokenSource _masterServerDisconnectCts;
-    private CancellationTokenSource _gameServerDisconnectCts;
+    private CancellationTokenSource _masterServerCts;
+    private CancellationTokenSource _gameServerCts;
 
-    private float _lastMessageReceivedTime;
+    private float _lastGameMessageTime;
 
     private bool _receivedInitMessage;
     private int? _gameServerPort;
 
     private void Start()
     {
-        TcpMessageReceived += _ => _lastMessageReceivedTime = Time.time;
-        UdpMessageReceived += _ => _lastMessageReceivedTime = Time.time;
+        TcpMessageReceived += _ => _lastGameMessageTime = Time.time;
+        UdpMessageReceived += _ => _lastGameMessageTime = Time.time;
 
         ConnectToMasterServer();
     }
 
     private void Update()
     {
-        if (!IsConnected || Time.time - _lastMessageReceivedTime < TimeoutSeconds)
+        if (!IsConnectedToGameSever || Time.time - _lastGameMessageTime < TimeoutSeconds)
             return;
 
         Debug.Log("Connection timed out due to inactivity.");
         DisconnectGameServer();
+
         if(UIManager.Instance != null && UIManager.Instance.InfoUI != null)
             UIManager.Instance.InfoUI.Open("Connection timed out.", "OK", null);
     }
 
     public async void ConnectToMasterServer()
     {
-        await UniTask.WaitUntil(() => UIManager.Instance != null && UIManager.Instance.InfoUI != null);
+        await UniTask.WaitUntil(() => SceneLoader.IsUILoaded);
+
+        _masterServerCts?.Cancel();
+        _masterServerCts?.Dispose();
+        _masterServerCts = new CancellationTokenSource();
+
+        IsConnectedToMasterServer = false;
 
         DebugConnectionConfig debugConnectionConfig = Resources.Load<DebugConnectionConfig>("DebugConnectionConfig");
 
@@ -71,12 +82,9 @@ public class ConnectionManager : Singleton<ConnectionManager>
             return;
         }
 
-        CancellationTokenSource connectCts = new();
-        _masterServerDisconnectCts = new CancellationTokenSource();
-
         UIManager.Instance.InfoUI.Open($"Connecting to master server\n{ipAddr}:{debugConnectionConfig.Port}", "", null, false);
 
-        CreateSocketResult result = await NetworkService.CreateTcpSocket(ipAddr, debugConnectionConfig.Port, TimeoutSeconds, connectCts.Token);
+        CreateSocketResult result = await NetworkService.CreateTcpSocket(ipAddr, debugConnectionConfig.Port, TimeoutSeconds, _masterServerCts.Token);
 
         if (!result.Success)
         {
@@ -88,16 +96,15 @@ public class ConnectionManager : Singleton<ConnectionManager>
 
                 case FailReason.Timeout:
                     UIManager.Instance.InfoUI.Open("Connection to master server timed out", "Try again", ConnectToMasterServer);
-
                     break;
 
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
-            _masterServerDisconnectCts?.Cancel();
-            _masterServerDisconnectCts?.Dispose();
-            _masterServerDisconnectCts = null;
+            _masterServerCts?.Cancel();
+            _masterServerCts?.Dispose();
+            _masterServerCts = null;
 
             return;
         }
@@ -105,100 +112,20 @@ public class ConnectionManager : Singleton<ConnectionManager>
         Debug.Log("Connected to MasterServer via TCP");
         _masterTcpSocket = result.Socket;
 
+        NetworkService.StartTcpLoop(_masterTcpSocket, OnMasterServerMessageReceived, OnMasterServerDisconnected, _masterServerCts.Token);
+
+        IsConnectedToMasterServer = true;
         UIManager.Instance.InfoUI.Close();
     }
 
     public async void ConnectToGameServer(string playerName)
     {
-        using CancellationTokenSource connectCts = new();
-        _gameServerDisconnectCts = new CancellationTokenSource();
+        bool success = await ConnectToGameServerInternal(playerName);
 
-        TcpSendMessageToMasterServer($"0;{(int)GameManager.SelectedGameType};");
-
-        NetworkService.StartTcpLoopAsync(_masterTcpSocket, OnMasterServerMessageReceived, OnMasterServerDisconnected, connectCts.Token);
-
-        await UniTask.WaitWhile(() => _gameServerPort == null, cancellationToken: connectCts.Token);
-        int port = _gameServerPort!.Value;
-
-        Debug.Log($"GameServer port: {port}");
-
-        // ToDo: IpAddress should be also sent by master server
-        DebugConnectionConfig debugConnectionConfig = Resources.Load<DebugConnectionConfig>("DebugConnectionConfig");
-        IPAddress ipAddr = IPAddress.Parse(debugConnectionConfig.IpAddress);
-
-        UIManager.Instance.InfoUI.Open($"Hello {playerName}!\nConnecting to {debugConnectionConfig.IpAddress}:{port}", "Cancel", connectCts.Cancel);
-
-        CreateSocketResult result = await NetworkService.CreateTcpSocket(ipAddr, port, TimeoutSeconds, connectCts.Token);
-
-        if (!result.Success)
+        if (!success)
         {
-            switch (result.FailReason)
-            {
-                case FailReason.Unknown:
-                    DisconnectGameServer();
-                    Debug.Log("Failed to connect to server. Check your internet connection.");
-                    return;
-
-                case FailReason.Timeout:
-                    DisconnectGameServer();
-                    UIManager.Instance.InfoUI.Open("Connection timed out.", "OK", null);
-                    return;
-
-                case FailReason.Canceled:
-                    DisconnectGameServer();
-                    connectCts.Dispose();
-                    Debug.LogWarning("User canceled connection");
-                    return;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            DisconnectGameServer();
         }
-
-        _gameTcpSocket = result.Socket;
-
-        Debug.Log("Connected to GameServer via TCP");
-        string message = await NetworkService.WaitForMessageAsync(_gameTcpSocket, connectCts.Token);
-        string[] messageParts = message.Trim('~').Split(';');
-
-        if (messageParts.Length != 3 || !int.TryParse(messageParts[0], out int messageType) || messageType != (int)GameManager.IncomingMessageType.ServerInfo) {
-            Debug.LogError("Incorrect ServerInfo message format: " +  message);
-            return;
-        }
-        if (!int.TryParse(messageParts[1], out int udpPort)) {
-            Debug.LogError("Failed parsing a UDP port: " +  messageParts[0]);
-            return;
-        }
-        if (!int.TryParse(messageParts[2], out int playerID)) {
-            Debug.LogError("Failed parsing a playerID: " + messageParts[1]);
-            return;
-        }
-
-        PlayerID = playerID;
-
-        Debug.Log($"Local player ID: {playerID}. GameServer UDP port: {udpPort}");
-
-        NetworkService.CreateUdpClient(ipAddr, udpPort, out _udpClient, out int udpLocalPort);
-        UdpLocalPort = udpLocalPort;
-
-        _lastMessageReceivedTime = Time.time;
-        IsConnected = true;
-
-        SceneLoader.StartGame();
-
-        NetworkService.StartTcpLoopAsync(
-            _gameTcpSocket,
-            tcpMessage => TcpMessageReceived?.Invoke(tcpMessage),
-            () =>
-            {
-                DisconnectGameServer();
-                if(UIManager.Instance != null && UIManager.Instance.InfoUI != null)
-                    UIManager.Instance.InfoUI.Open("Disconnected from server.", "OK", null);
-            },
-            _gameServerDisconnectCts.Token);
-        NetworkService.StartUdpLoopAsync(_udpClient, udpMessage => UdpMessageReceived?.Invoke(udpMessage), _gameServerDisconnectCts.Token);
-
-        UIManager.Instance.InfoUI.Close();
     }
 
     public async void TcpSendMessageToGameServer(string message)
@@ -216,20 +143,123 @@ public class ConnectionManager : Singleton<ConnectionManager>
         await NetworkService.SendMessageAsync(_udpClient, message);
     }
 
-    public void DisconnectGameServer(bool openUI = true)
+    public void DisconnectGameServer(bool openMainMenu = true, bool showInfo = false)
     {
-        _gameServerDisconnectCts?.Cancel();
-        _gameServerDisconnectCts?.Dispose();
-        _gameServerDisconnectCts = null;
-        IsConnected = false;
-        _udpClient?.Close();
+        IsConnectedToGameSever = false;
 
+        _gameServerPort = null;
+
+        _gameServerCts?.Cancel();
+        _gameServerCts?.Dispose();
+        _gameServerCts = null;
+
+        _udpClient?.Close();
         NetworkService.CloseSocket(_gameTcpSocket);
 
-        if(openUI)
-            SceneLoader.OpenMainMenu();
+        if (openMainMenu && IsConnectedToMasterServer)
+        {
+            SceneLoader.OpenMainMenuAsync().Forget();
+        }
+
+        if (showInfo && IsConnectedToMasterServer)
+        {
+            if(UIManager.Instance != null && UIManager.Instance.InfoUI != null)
+                UIManager.Instance.InfoUI.Open("Disconnected from GAME server.", "OK", null);
+        }
 
         Debug.Log("Disconnected from GameServer");
+    }
+
+    private async UniTask<bool> ConnectToGameServerInternal(string playerName)
+    {
+        IsConnectedToGameSever = false;
+        _gameServerCts?.Cancel();
+        _gameServerCts?.Dispose();
+        _gameServerCts = new CancellationTokenSource();
+        _gameServerPort = null;
+
+        UIManager.Instance.InfoUI.Open($"Hello {playerName}!\nWaiting for game server connection info", "Cancel", _gameServerCts.Cancel);
+
+        TcpSendMessageToMasterServer($"0;{(int)GameManager.SelectedGameType};");
+        await UniTask.WaitWhile(() => _gameServerPort == null, cancellationToken: _gameServerCts.Token);
+        int port = _gameServerPort!.Value;
+
+        Debug.Log($"GameServer port: {port}");
+
+        // ToDo: IpAddress should be also sent by master server
+        DebugConnectionConfig debugConnectionConfig = Resources.Load<DebugConnectionConfig>("DebugConnectionConfig");
+        IPAddress ipAddr = IPAddress.Parse(debugConnectionConfig.IpAddress);
+
+        UIManager.Instance.InfoUI.Open($"Hello {playerName}!\nConnecting to {debugConnectionConfig.IpAddress}:{port}", "Cancel", _gameServerCts.Cancel);
+
+        CreateSocketResult result = await NetworkService.CreateTcpSocket(ipAddr, port, TimeoutSeconds, _gameServerCts.Token);
+
+        if (!result.Success)
+        {
+            switch (result.FailReason)
+            {
+                case FailReason.Unknown:
+                    UIManager.Instance.InfoUI.Open("Failed to connect to server. Check your internet connection.", "OK", null);
+                    return false;
+
+                case FailReason.Timeout:
+                    UIManager.Instance.InfoUI.Open("Connection timed out.", "OK", null);
+                    return false;
+
+                case FailReason.Canceled:
+                    Debug.LogWarning("User canceled connection");
+                    return false;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        _gameTcpSocket = result.Socket;
+
+        Debug.Log("Connected to GameServer via TCP");
+        string message = await NetworkService.WaitForMessageAsync(_gameTcpSocket, _gameServerCts.Token);
+        string[] messageParts = message.Trim('~').Split(';');
+
+        if (messageParts.Length != 3 || !int.TryParse(messageParts[0], out int messageType) || messageType != (int)GameManager.IncomingMessageType.ServerInfo) {
+            Debug.LogError("Incorrect ServerInfo message format: " +  message);
+            return false;
+        }
+        if (!int.TryParse(messageParts[1], out int udpPort)) {
+            Debug.LogError("Failed parsing a UDP port: " +  messageParts[0]);
+            return false;
+        }
+        if (!int.TryParse(messageParts[2], out int playerID)) {
+            Debug.LogError("Failed parsing a playerID: " + messageParts[1]);
+            return false;
+        }
+
+        PlayerID = playerID;
+
+        Debug.Log($"Local player ID: {playerID}. GameServer UDP port: {udpPort}");
+
+        NetworkService.CreateUdpClient(ipAddr, udpPort, out _udpClient, out int udpLocalPort);
+        LocalUdpPort = udpLocalPort;
+
+        _lastGameMessageTime = Time.time;
+        IsConnectedToGameSever = true;
+
+        await SceneLoader.StartGameAsync();
+
+        NetworkService.StartTcpLoop(
+            _gameTcpSocket,
+            tcpMessage => TcpMessageReceived?.Invoke(tcpMessage),
+            () =>
+            {
+                DisconnectGameServer(showInfo: true);
+            },
+            _gameServerCts.Token);
+
+        NetworkService.StartUdpLoop(_udpClient, udpMessage => UdpMessageReceived?.Invoke(udpMessage), _gameServerCts.Token);
+
+        UIManager.Instance.InfoUI.Close();
+
+        return true;
     }
 
     private void OnMasterServerMessageReceived(string message)
@@ -262,16 +292,34 @@ public class ConnectionManager : Singleton<ConnectionManager>
 
     private void OnMasterServerDisconnected()
     {
-        Debug.LogWarning("TODO: Handle disconnection from GameServer");
+        HandleMasterServerDisconnect();
+    }
+
+    private void HandleMasterServerDisconnect(bool openMainMenu = true)
+    {
+        if(IsConnectedToGameSever)
+            DisconnectGameServer(false);
+
+        IsConnectedToMasterServer = false;
+        _receivedInitMessage = false;
+
+        NetworkService.CloseSocket(_masterTcpSocket);
+
+        _masterServerCts?.Cancel();
+        _masterServerCts?.Dispose();
+        _masterServerCts = null;
+
+        if (openMainMenu)
+        {
+            SceneLoader.OpenMainMenuAsync().Forget();
+            Debug.LogWarning("Lost connection with master server!");
+            UIManager.Instance.InfoUI.Open("Lost connection with master server!", "Reconnect", ConnectToMasterServer);
+        }
     }
 
     private void OnDestroy()
     {
         DisconnectGameServer(false);
-        NetworkService.CloseSocket(_masterTcpSocket);
-
-        _masterServerDisconnectCts?.Cancel();
-        _masterServerDisconnectCts?.Dispose();
-        _masterServerDisconnectCts = null;
+        HandleMasterServerDisconnect(false);
     }
 }

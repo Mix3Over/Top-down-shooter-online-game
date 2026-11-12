@@ -61,7 +61,7 @@ public class PlayerController : MonoBehaviour
 
     private void Shoot()
     {
-        if (!ConnectionManager.Instance.IsConnected)
+        if (!ConnectionManager.Instance.IsConnectedToGameSever)
             return;
 
         if (Time.time - _lastShootTime < _player.PlayerTypeData.ShootingCooldown)
@@ -75,7 +75,7 @@ public class PlayerController : MonoBehaviour
 
     private void SendTransformData()
     {
-        if (!ConnectionManager.Instance.IsConnected)
+        if (!ConnectionManager.Instance.IsConnectedToGameSever)
             return;
 
         Vector2Int position = transform.position.ToServer();

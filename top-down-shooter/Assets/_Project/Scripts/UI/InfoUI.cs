@@ -10,7 +10,7 @@ public class InfoUI : UIWindow
 
     private Action _buttonPressed;
 
-    override protected void Awake()
+    protected override void Awake()
     {
         base.Awake();
         _confirmButton.onClick.AddListener(OnConfirmButtonClicked);

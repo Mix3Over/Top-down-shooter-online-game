@@ -86,7 +86,7 @@ public static class NetworkService
         localUdpPort = localEndPoint.Port;
     }
 
-    public static async void StartUdpLoopAsync(UdpClient udpClient, Action<string> onMessageReceived, CancellationToken cancellationToken)
+    public static async void StartUdpLoop(UdpClient udpClient, Action<string> onMessageReceived, CancellationToken cancellationToken)
     {
         Debug.Log("[UDP] Start read");
 
@@ -110,7 +110,7 @@ public static class NetworkService
         Debug.Log("[UDP] End read");
     }
 
-    public static async void StartTcpLoopAsync(Socket socket, Action<string> onMessageReceived, Action onDisconnected, CancellationToken cancellationToken)
+    public static async void StartTcpLoop(Socket socket, Action<string> onMessageReceived, Action onDisconnected, CancellationToken cancellationToken)
     {
         Debug.Log("[TCP] Started read loop...");
         string message = "";
