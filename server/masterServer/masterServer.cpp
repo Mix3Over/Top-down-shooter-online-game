@@ -50,17 +50,6 @@ void handleServerStartedMessage(const incomingGameServerMessages::GameServerStar
     isGameServerActive = true;
 }
 
-std::vector<std::string_view> split(std::string_view s, char delim) {
-    std::vector<std::string_view> result;
-    size_t start = 0, pos;
-    while ((pos = s.find(delim, start)) != std::string_view::npos) {
-        result.push_back(s.substr(start, pos - start));
-        start = pos + 1;
-    }
-    result.push_back(s.substr(start));
-    return result;
-}
-
 void sendPlayerCountMessageToAll(){
     // std::string playerCountMessage = messageBuilder.createMessage((int)SendMessage::PlayerCount, idToPlayer.size());
     // connectionService.sendTcpMessageToAll(playerCountMessage);
@@ -71,8 +60,10 @@ void onNewServerMessage(const Connection& connection, const std::string& message
 
     printf("[MasterServer] Received message from game server: %s\n", message.c_str());
 
-    auto messageParts = split(message, fieldSeparator);
-    Type messageType = (Type)std::stoi(messageParts[0].data());
+    Type messageType;
+    std::vector<std::string_view> messageParts;
+    
+    splitMessage(message, messageParts, messageType);
 
     switch (messageType){
         case Type::ServerStarted: {

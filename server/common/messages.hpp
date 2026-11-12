@@ -101,3 +101,20 @@ private:
         return true;
     }
 };
+
+inline std::vector<std::string_view> split(std::string_view s, char delim) {
+    std::vector<std::string_view> result;
+    size_t start = 0, pos;
+    while ((pos = s.find(delim, start)) != std::string_view::npos) {
+        result.push_back(s.substr(start, pos - start));
+        start = pos + 1;
+    }
+    result.push_back(s.substr(start));
+    return result;
+}
+
+template <typename MessageType>
+void splitMessage(const std::string& message, std::vector<std::string_view>& parts, MessageType& messageType) {
+    parts = split(message, fieldSeparator);
+    messageType = (MessageType)std::stoi(parts[0].data());
+}
