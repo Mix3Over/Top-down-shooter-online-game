@@ -13,15 +13,15 @@ public class ChatUI : MonoBehaviour
         _messagePrefab.SetActive(false);
     }
 
-    private void OnEnable()
-    {
-        ConnectionManager.TcpMessageReceived += AddNewMessage;
-    }
-
-    private void OnDisable()
-    {
-        ConnectionManager.TcpMessageReceived -= AddNewMessage;
-    }
+    // private void OnEnable()
+    // {
+    //     ConnectionManager.TcpMessageReceived += AddNewMessage;
+    // }
+    //
+    // private void OnDisable()
+    // {
+    //     ConnectionManager.TcpMessageReceived -= AddNewMessage;
+    // }
 
     private void AddNewMessage(string message)
     {
@@ -34,7 +34,7 @@ public class ChatUI : MonoBehaviour
     {
         if (message == string.Empty)
             return;
-        ConnectionManager.Instance.TcpSendMessageToGameServer(message);
+        ConnectionManager.Instance.SendMessageToGameServer(message, reliable: true);
         AddNewMessage("Ty: " + message);
     }
 }

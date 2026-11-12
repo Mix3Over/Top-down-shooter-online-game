@@ -25,7 +25,8 @@ public class GameManager : Singleton<GameManager>
         BulletSpawn,
         PlayerHit,
         RemoveBullet,
-        PlayerScores
+        PlayerScores,
+        UDP_Update
     }
 
     public enum OutgoingMessageType
@@ -51,6 +52,26 @@ public class GameManager : Singleton<GameManager>
 
     public static GameType SelectedGameType {get; set;} = GameType.FFA;
 
+    private Dictionary<IncomingMessageType, Action<string>> _incomingMessagesHandlers;
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        _incomingMessagesHandlers = new Dictionary<IncomingMessageType, Action<string>>()
+        {
+            { IncomingMessageType.InitLocalPlayer, InitLocalPlayer },
+            { IncomingMessageType.InitPlayers, InitPlayers },
+            { IncomingMessageType.AddRemotePlayer, AddRemotePlayer },
+            { IncomingMessageType.RemoveRemotePlayer, RemovePlayer },
+            { IncomingMessageType.BulletSpawn, SpawnBullet },
+            { IncomingMessageType.PlayerHit, PlayerHit },
+            { IncomingMessageType.RemoveBullet, RemoveBullet },
+            { IncomingMessageType.PlayerScores, UpdatePlayerScores },
+            { IncomingMessageType.UDP_Update, OnUdpMessageReceived }
+        };
+    }
+
     private async void Start()
     {
         Application.targetFrameRate = 60;
@@ -62,14 +83,12 @@ public class GameManager : Singleton<GameManager>
 
     private void OnEnable()
     {
-        ConnectionManager.TcpMessageReceived += OnTcpMessageReceived;
-        ConnectionManager.UdpMessageReceived += OnUdpMessageReceived;
+        ConnectionManager.GameMessageReceived += OnMessageReceived;
     }
 
     private void OnDisable()
     {
-        ConnectionManager.TcpMessageReceived -= OnTcpMessageReceived;
-        ConnectionManager.UdpMessageReceived -= OnUdpMessageReceived;
+        ConnectionManager.GameMessageReceived -= OnMessageReceived;
     }
 
     public void SetGameType(int gameTypeIndex)
@@ -82,53 +101,37 @@ public class GameManager : Singleton<GameManager>
     {
         UIManager.Instance.LeaderboardUI.Open();
         PlayerTypeData playerTypeData = _playerTypes[playerTypeIndex];
-        ConnectionManager.Instance.TcpSendMessageToGameServer(
+        ConnectionManager.Instance.SendMessageToGameServer(
             $"{(int)OutgoingMessageType.Init};" +
             $"{ConnectionManager.Instance.LocalUdpPort};" +
             $"{UIManager.Instance.LobbyUI.PlayerName};" +
             $"{playerTypeIndex};{playerTypeData.BulletDamage};" +
             $"{playerTypeData.BulletSpeed};" +
             $"{playerTypeData.StartingHealth};" +
-            $"{(int)SelectedGameType};");
+            $"{(int)SelectedGameType};",
+            reliable: true
+            );
     }
 
-    private void OnTcpMessageReceived(string message)
+    private void OnMessageReceived(string message)
     {
         string[] parts = message.Split(";");
 
         if (parts.Length < 1) {
-            Debug.LogWarning("Incorrect TCP message format!");
+            Debug.LogWarning("Incorrect message format: " + message);
             return;
         }
 
         string trimmedMessage = message[1..].Trim(';');
         int.TryParse(parts[0], out int messageType);
 
-        switch ((IncomingMessageType)messageType) {
-            case IncomingMessageType.InitLocalPlayer:
-                InitLocalPlayer(trimmedMessage);
-                break;
-            case IncomingMessageType.InitPlayers:
-                InitPlayers(trimmedMessage);
-                break;
-            case IncomingMessageType.AddRemotePlayer:
-                AddRemotePlayer(trimmedMessage);
-                break;
-            case IncomingMessageType.RemoveRemotePlayer:
-                RemovePlayer(trimmedMessage);
-                break;
-            case IncomingMessageType.BulletSpawn:
-                SpawnBullet(trimmedMessage);
-                break;
-            case IncomingMessageType.PlayerHit:
-                PlayerHit(trimmedMessage);
-                break;
-            case IncomingMessageType.RemoveBullet:
-                RemoveBullet(trimmedMessage);
-                break;
-            case IncomingMessageType.PlayerScores:
-                UpdatePlayerScores(trimmedMessage);
-                break;
+        if (_incomingMessagesHandlers.ContainsKey((IncomingMessageType)messageType))
+        {
+            _incomingMessagesHandlers[(IncomingMessageType)messageType]?.Invoke(trimmedMessage);
+        }
+        else
+        {
+            Debug.LogWarning("Received unhandled message type:  " + message);
         }
     }
 
@@ -299,7 +302,7 @@ public class GameManager : Singleton<GameManager>
 
     private void OnUdpMessageReceived(string message)
     {
-        string[] playersData = message.TrimStart('9', ';').Split("!");
+        string[] playersData = message.Split("!");
 
         foreach (string playerData in playersData) {
             if(playerData == string.Empty)

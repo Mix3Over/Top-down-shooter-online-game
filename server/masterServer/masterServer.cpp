@@ -51,8 +51,8 @@ void handleServerStartedMessage(const incomingGameServerMessages::GameServerStar
 }
 
 void sendPlayerCountMessageToAll(){
-    // std::string playerCountMessage = messageBuilder.createMessage((int)SendMessage::PlayerCount, idToPlayer.size());
-    // connectionService.sendTcpMessageToAll(playerCountMessage);
+    outgoingMessages::PlayersCount serverInfoMessage { .playersCount = (int)idToPlayer.size() };
+    connectionService.sendTcpMessageToAll(serverInfoMessage);
 }
 
 void onNewServerMessage(const Connection& connection, const std::string& message) {
@@ -143,8 +143,8 @@ void onPlayerDisconnected(const Connection& connection) {
 }
 
 void sendHeartbeat() {
-    // std::string heartbeatMessage = messageBuilder.createMessage((int)SendMessage::Heartbeat);
-    // connectionService.sendTcpMessageToAll(heartbeatMessage);
+    outgoingMessages::Hearbeat heartbeatMessage{}   ;
+    connectionService.sendTcpMessageToAll(heartbeatMessage);
 }
 
 int main(int argc, char **argv) {

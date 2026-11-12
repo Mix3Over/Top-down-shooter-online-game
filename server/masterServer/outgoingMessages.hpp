@@ -5,10 +5,10 @@
 namespace outgoingMessages {
 
     enum class Type {
-        PlayerInit,
-        GameServerInfo,
         Heartbeat,
-        PlayerCount,
+        PlayerInfo,
+        PlayersCount,
+        GameServerInfo,
     };
 
     struct GameServerInfo : OutgoingMessage<GameServerInfo> {
@@ -20,11 +20,25 @@ namespace outgoingMessages {
     };
 
     struct PlayerInit : OutgoingMessage<PlayerInit> {
-        static constexpr Type MessageType = Type::PlayerInit;
+        static constexpr Type MessageType = Type::PlayerInfo;
 
         int playerId = 0;
 
         auto Fields() const { return std::tie(playerId); }
+    };
+
+    struct PlayersCount : OutgoingMessage<PlayersCount> {
+        static constexpr Type MessageType = Type::PlayersCount;
+
+        int playersCount = 0;
+
+        auto Fields() const { return std::tie(playersCount); }
+    };
+
+    struct Hearbeat : OutgoingMessage<Hearbeat> {
+        static constexpr Type MessageType = Type::Heartbeat;
+
+        auto Fields() const { return std::tie(); }
     };
 }
 

@@ -69,8 +69,13 @@ public class PlayerController : MonoBehaviour
 
         _lastShootTime = Time.time;
         Vector2Int position = transform.position.ToServer();
-        ConnectionManager.Instance.TcpSendMessageToGameServer(
-            $"{(int)GameManager.OutgoingMessageType.Shoot};{position.x};{position.y};{Mathf.RoundToInt(_player.Visual.transform.eulerAngles.z)};");
+        ConnectionManager.Instance.SendMessageToGameServer(
+            $"{(int)GameManager.OutgoingMessageType.Shoot}" +
+            $";{position.x}" +
+            $";{position.y}" +
+            $";{Mathf.RoundToInt(_player.Visual.transform.eulerAngles.z)};",
+            reliable: true
+            );
     }
 
     private void SendTransformData()
@@ -79,7 +84,13 @@ public class PlayerController : MonoBehaviour
             return;
 
         Vector2Int position = transform.position.ToServer();
-        ConnectionManager.Instance.UdpSendMessageToGameServer(
-            $"{(int)GameManager.OutgoingMessageType.UpdUpdate};{ConnectionManager.Instance.PlayerID};{position.x};{position.y};{Mathf.RoundToInt(_player.Visual.transform.eulerAngles.z)};");
+        ConnectionManager.Instance.SendMessageToGameServer(
+            $"{(int)GameManager.OutgoingMessageType.UpdUpdate};" +
+            $"{ConnectionManager.Instance.PlayerID};" +
+            $"{position.x};" +
+            $"{position.y};" +
+            $"{Mathf.RoundToInt(_player.Visual.transform.eulerAngles.z)};",
+            reliable: false
+            );
     }
 }
