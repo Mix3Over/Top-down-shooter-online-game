@@ -14,12 +14,9 @@ namespace incomingPlayerMessages {
         int udpPort = 0;
         std::string name;
         int type = 0;
-        int damage = 0;
-        int bulletSpeed = 0;
-        int hp = 0;
         int gameType = 0;
 
-        auto Fields() { return std::tie(udpPort, name, type, damage, bulletSpeed, hp, gameType); }
+        auto Fields() { return std::tie(udpPort, name, type, gameType); }
     };
 
     struct ShootMessage : IncomingMessage<ShootMessage> {
@@ -32,11 +29,12 @@ namespace incomingPlayerMessages {
 
     struct UDP_UpdateMessage : IncomingMessage<UDP_UpdateMessage> {
         int playerId = 0;
-        int positionX = 0;
-        int positionY = 0;
+        int moveX = 0;
+        int moveY = 0;
         int rotation = 0;
+        int isShooting =0;
 
-        auto Fields() { return std::tie(playerId, positionX, positionY, rotation); }
+        auto Fields() { return std::tie(playerId, moveX, moveY, rotation, isShooting); }
     };
 }
 

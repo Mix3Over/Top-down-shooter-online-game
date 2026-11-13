@@ -13,6 +13,7 @@
 #include "incomingMessages.hpp"
 #include "player.hpp"
 #include "bullet.hpp"
+#include "playerTypeConfig.hpp"
 
 ConnectionService connectionService;
 Connection* masterServerConnection;
@@ -35,9 +36,10 @@ std::unordered_map<int, Player*> idToPlayer;
 std::unordered_map<const Connection*, Player> connectionToPlayerMap;
 
 void handleMsgInit(Player& player, const incomingPlayerMessages::InitMessage& message);
-void handleMsgShoot(Player& player, const incomingPlayerMessages::ShootMessage& message);
 void handleMsgUdpUpdate(const incomingPlayerMessages::UDP_UpdateMessage& message);
 void handleSetGameModeMessage(const incomingMasterServerMessages::SetGameModeMessage& message);
+void spawnBulletForPlayer(Player& player);
+void playersUpdate(int deltaTime);
 
 void onMasterServerDisconnected(const Connection& connection) {
     printf("[GameServer] Master server disconnected. Closing game server.\n");
@@ -109,16 +111,6 @@ void onNewTcpMessage(const Connection& connection, const std::string& message) {
             handleMsgInit(player, initMessage);
             break;
         }
-        case Type::Shoot: {
-            ShootMessage shootMessage;
-
-            if(!shootMessage.TryParse(messageParts)){
-                printf("[GameServer] Failed to parse ShootMessage: %s\n", message.c_str());
-                return;
-            }
-            handleMsgShoot(player, shootMessage);
-            break;
-        }
         default:
             printf("[GameServer] Unknown message type from player: %d Message: %s\n", (int)messageType, message.c_str());
             break;
@@ -171,16 +163,18 @@ void handleSetGameModeMessage(const incomingMasterServerMessages::SetGameModeMes
 }
 
 void handleMsgUdpUpdate(const incomingPlayerMessages::UDP_UpdateMessage& message) {
-    idToPlayer[message.playerId]->positionX = message.positionX;
-    idToPlayer[message.playerId]->positionY = message.positionY;
-    idToPlayer[message.playerId]->rotation = message.rotation;
+   Player* player = idToPlayer[message.playerId];
+   player->inputMoveX=message.moveX;
+   player->inputMoveY=message.moveY;
+   player->rotation=message.rotation;
+   player->isShooting=message.isShooting;
 }
 
 void handleMsgInit(Player& player, const incomingPlayerMessages::InitMessage& message) {
     currentGameType = (GameType)message.gameType;
     printf("[GameServer] Selected game type: %d\n", (int)currentGameType);
 
-    player.Initialize(message.udpPort, message.name, message.type, message.damage, message.bulletSpeed, message.hp);
+    player.Initialize(message.udpPort, message.name, message.type);
     printf("[GameServer] Player initialized: %d\n", player.isAlive);
 
     outgoingMessages::InitLocalPlayer initMessage{ .positionX = player.positionX, .positionY = player.positionY };
@@ -215,34 +209,76 @@ void handleMsgInit(Player& player, const incomingPlayerMessages::InitMessage& me
     connectionService.sendTcpMessageToAll(addPlayerMessage);
 }
 
-void handleMsgShoot(Player& player, const incomingPlayerMessages::ShootMessage& message) {
-    if(!player.isAlive)
+void spawnBulletForPlayer(Player &player)
+{
+    if (!player.isAlive)
         return;
-    
-    Bullet bulletData {
+
+    Bullet bulletData{
         .id = nextBulletID++,
         .playerId = player.id,
-        .positionX = message.positionX,
-        .positionY = message.positionY,
-        .direction = message.rotation,
+        .positionX = player.positionX,
+        .positionY = player.positionY,
+        .direction = player.rotation,
         .speed = player.bulletSpeed,
         .lifetime = bulletLifetime,
-        .damage = player.damage
-    };
+        .damage = player.damage};
 
     idToBullet[bulletData.id] = bulletData;
 
-    printf("[GameServer] Player %d shot bullet %d at (%d, %d) with rotation %d\n", player.id, bulletData.id, message.positionX, message.positionY, message.rotation);
-    
-    outgoingMessages::BulletSpawn shootMessage{ 
-        .id = bulletData.id, 
-        .playerId = bulletData.playerId, 
-        .positionX = bulletData.positionX, 
-        .positionY = bulletData.positionY, 
-        .direction = bulletData.direction 
-    };
+    printf("[GameServer] Player %d shot bullet %d at (%d, %d) with rotation %d\n", player.id, bulletData.id, player.positionX, player.positionY, player.rotation);
+
+    outgoingMessages::BulletSpawn shootMessage{
+        .id = bulletData.id,
+        .playerId = bulletData.playerId,
+        .positionX = bulletData.positionX,
+        .positionY = bulletData.positionY,
+        .direction = bulletData.direction};
 
     connectionService.sendTcpMessageToAll(shootMessage);
+}
+
+void playersUpdate(int deltaTime)
+{
+    auto now = std::chrono::high_resolution_clock::now();
+
+    for (auto &[id, player] : idToPlayer)
+    {
+        if (!player->isInitialized || !player->isAlive)
+            continue;
+
+        float dirX = player->inputMoveX / 100.0f;
+        float dirY = player->inputMoveY / 100.0f;
+        float length = std::sqrt(dirX * dirX + dirY * dirY);
+
+        if (length > 1.0f)
+        {
+            dirX /= length;
+            dirY /= length;
+        }
+
+        player->positionX += (int)std::round(100.0f * player->movementSpeed * dirX * deltaTime / 1000.0f);
+        player->positionY += std::round(100.0f * player->movementSpeed * dirY * deltaTime / 1000.0f);
+
+        if (player->positionX > 3000)
+            player->positionX = 3000;
+        if (player->positionX < -3000)
+            player->positionX = -3000;
+        if (player->positionY > 2000)
+            player->positionX = 2000;
+        if (player->positionY < -2000)
+            player->positionX = -2000;
+
+        if (player->isShooting)
+        {
+            auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - player->lastShootTime).count();
+            if (elapsedTime >= player->shootingCooldown)
+            {
+                player->lastShootTime = now;
+                spawnBulletForPlayer(*player);
+            }
+        }
+    }
 }
 
 void bulletsUpdate(int deltaTime) {
@@ -352,6 +388,7 @@ void sendUpdateToPlayers(){
 }
 
 void tickUpdate(int deltaTime){
+    playersUpdate(deltaTime);
     sendUpdateToPlayers();
     if(tickCount % ticksPerSecond == 0){
         updatePlayersScore();
