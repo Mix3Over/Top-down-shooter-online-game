@@ -19,11 +19,14 @@ Connection* masterServerConnection;
 
 const int bulletLifetime = 128;
 const int ticksPerSecond = 32;
+const int noActivePlayerTimeout = 5000; // 5 seconds
 
 int tickCount = 0;
 
 int nextPlayerID = 0;
 int nextBulletID = 0;
+
+std::chrono::high_resolution_clock::time_point lastActivePlayerTime;
 
 GameType currentGameType = GameType::FFA;
 
@@ -35,6 +38,12 @@ void handleMsgInit(Player& player, const incomingPlayerMessages::InitMessage& me
 void handleMsgShoot(Player& player, const incomingPlayerMessages::ShootMessage& message);
 void handleMsgUdpUpdate(const incomingPlayerMessages::UDP_UpdateMessage& message);
 void handleSetGameModeMessage(const incomingMasterServerMessages::SetGameModeMessage& message);
+
+void onMasterServerDisconnected(const Connection& connection) {
+    printf("[GameServer] Master server disconnected. Closing game server.\n");
+    connectionService.closeAllConnections();
+    exit(0);
+}
 
 void onNewMasterServerMessage(const Connection& connection, const std::string& message) {
     using namespace incomingMasterServerMessages;
@@ -378,7 +387,7 @@ int main(int argc, char **argv) {
         onNewUdpMessage
     );
 
-    masterServerConnection = &connectionService.createConnection(masterServerFd, onNewMasterServerMessage, sockaddr_in{}, true);
+    masterServerConnection = &connectionService.createConnection(masterServerFd, onNewMasterServerMessage, onMasterServerDisconnected, sockaddr_in{}, true);
     std::string message = std::to_string(connectionService.getTcpPort());
 
     outgoingMasterServerMessages::GameServerInfo serverInfoMessage { 
@@ -388,16 +397,31 @@ int main(int argc, char **argv) {
     connectionService.sendTcpMessageTo(*masterServerConnection, serverInfoMessage);
 
     int cooldown = 1000 / ticksPerSecond;
-    auto lastTickTime = std::chrono::high_resolution_clock::now();
+
+    using namespace std::chrono;
+
+    auto lastTickTime = high_resolution_clock::now();
+    lastActivePlayerTime = lastTickTime;
 
     while (true) {
-        auto duration = std::chrono::high_resolution_clock::now() - lastTickTime;
-        auto deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+        auto duration = high_resolution_clock::now() - lastTickTime;
+        auto deltaTime = duration_cast<milliseconds>(duration).count();
+
+        if(idToPlayer.empty()){
+            auto durationSinceLastActivePlayer = duration_cast<milliseconds>(high_resolution_clock::now() - lastActivePlayerTime).count();
+
+            if(durationSinceLastActivePlayer >= noActivePlayerTimeout){
+                printf("[GameServer] No active players for %d ms. Shutting down.\n", noActivePlayerTimeout);
+                ctrl_c(0);
+            }
+        } else {
+            lastActivePlayerTime = high_resolution_clock::now();
+        }
 
         if(deltaTime >= cooldown){
             tickUpdate(deltaTime);
             tickCount++;
-            lastTickTime = std::chrono::high_resolution_clock::now();
+            lastTickTime = high_resolution_clock::now();
             continue;
         }
 

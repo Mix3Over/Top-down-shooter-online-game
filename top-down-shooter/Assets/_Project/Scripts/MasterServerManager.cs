@@ -115,9 +115,7 @@ public class MasterServerManager : Singleton<MasterServerManager>
 
     private void HandleGameServerInfoMessage(string message)
     {
-        string[] data = message.Trim().Split(";");
-
-        if (data.Length != 2 || !int.TryParse(data[1], out int port))
+        if (!int.TryParse(message, out int port))
         {
             Debug.Log($"Incorrect GameServerInfo message format. Message: {message}");
             ConnectionManager.Instance.DisconnectGameServer();

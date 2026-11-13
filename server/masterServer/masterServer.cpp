@@ -33,6 +33,14 @@ bool isGameServerActivating;
 void ctrl_c(int);
 void handleMsgStartGame(Player& player, const incomingPlayerMessages::StartGameMessage& message);
 
+void onGameServerDisconnected(const Connection& connection) {
+    printf("[MasterServer] Game server disconnected\n");
+    isGameServerActive = false;
+    isGameServerActivating = false;
+    gameServerData.isStarted = false;
+    gameServerData.tcpPort = -1;
+}
+
 void handleServerStartedMessage(const incomingGameServerMessages::GameServerStarted& message) {
     gameServerData.isStarted = true;
     gameServerData.tcpPort = message.tcpPort;
@@ -218,7 +226,7 @@ void startGameServer(){
 
     close(sv[1]);
 
-    connectionService.createConnection(sv[0], onNewServerMessage, sockaddr_in{}, true);
+    connectionService.createConnection(sv[0], onNewServerMessage, onGameServerDisconnected, sockaddr_in{}, true);
     printf("[MasterServer] Started game server. FD: %d GameServerFD: %d\n", sv[0], sv[1]);
 }
 

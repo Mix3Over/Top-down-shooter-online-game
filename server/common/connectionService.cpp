@@ -11,7 +11,13 @@
 Connection::Connection(
     int tcpFd,
     void(*onNewMessage)(const Connection& connection, const std::string& message),
-    sockaddr_in udpAddress): tcpFd(tcpFd), onNewMessage(onNewMessage), udpAddress(udpAddress) {}
+    void(*onDisconnected)(const Connection& connection),
+    sockaddr_in udpAddress
+    ): 
+        tcpFd(tcpFd), 
+        onNewMessage(onNewMessage), 
+        onDisconnected(onDisconnected),
+        udpAddress(udpAddress) {}
 
 ConnectionService::ConnectionService(
     int tcpPort,
@@ -91,7 +97,7 @@ void ConnectionService::handleNewClient(epoll_event& ee){
     getnameinfo((sockaddr *)&clientAddr, clientAddrSize, host, NI_MAXHOST, port, NI_MAXSERV, 0);
     printf("[ConnectionService] New connection from: %s:%s (fd: %d)\n", host, port, clientFd);
 
-    createConnection(clientFd, onNewTcpMessage, *(sockaddr_in*)&clientAddr, false);
+    createConnection(clientFd, onNewTcpMessage, onPlayerDisconnected, *(sockaddr_in*)&clientAddr, false);
 
     if(onNewConnection != nullptr)
         onNewConnection(fdToConnection[clientFd]);
@@ -214,8 +220,8 @@ void ConnectionService::handleDisconnect(const Connection& connection){
     fdToConnection.erase(connection.tcpFd);
     closeConnection(connection.tcpFd);
 
-    if(onPlayerDisconnected != nullptr){
-        onPlayerDisconnected(connection);
+    if(connection.onDisconnected != nullptr){
+        connection.onDisconnected(connection);
     }
 }
 
@@ -282,17 +288,22 @@ void ConnectionService::handleUdpMessages(){
     }
 }
 
-Connection& ConnectionService::createConnection(int fd, void(*onNewMessage)(const Connection& connection, const std::string& message), sockaddr_in udpAddress, bool isAdditional) {
+Connection& ConnectionService::createConnection(
+    int fd, 
+    void(*onNewMessage)(const Connection& connection, const std::string& message), 
+    void(*onDisconnected)(const Connection& connection),
+    sockaddr_in udpAddress, 
+    bool isAdditional) {
     epoll_event ee{};
     ee.events = EPOLLIN;
     ee.data.fd = fd;
     epoll_ctl(epollDesc, EPOLL_CTL_ADD, fd, &ee);
 
     if(isAdditional){
-        additionalFdToConnection.try_emplace(fd, fd, onNewMessage, udpAddress);
+        additionalFdToConnection.try_emplace(fd, fd, onNewMessage, onDisconnected, udpAddress);
         return additionalFdToConnection[fd];
     }
 
-    fdToConnection.try_emplace(fd, fd, onNewMessage, udpAddress);
+    fdToConnection.try_emplace(fd, fd, onNewMessage, onDisconnected, udpAddress);
     return fdToConnection[fd];
 }
