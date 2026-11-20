@@ -1,11 +1,14 @@
 using UnityEngine;
 
-[RequireComponent (typeof(Player))]
+[RequireComponent(typeof(Player))]
 public class PlayerController : MonoBehaviour
 {
     private Player _player;
     private bool _isShooting;
-    private float _lastShootTime;
+    private Vector2 _moveInput;
+    private Vector2 _lastMousePosition;
+    private float _sendTimer;
+    private const float SendInterval = 1f / 32f;
 
     private void Awake()
     {
@@ -28,69 +31,61 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        SendTransformData();
+        _sendTimer += Time.deltaTime;
+        if (_sendTimer >= SendInterval)
+        {
+            _sendTimer = 0f;
+            SendInputData();
+            _moveInput = Vector2.zero;
+            _isShooting = false;
+        }
     }
 
     private void Move(Vector2 move)
     {
-        Vector3 movementVector3 = move;
-
-        if (movementVector3.magnitude > 1)
-            movementVector3.Normalize();
-
-        Vector3 position = transform.position + movementVector3 * (_player.PlayerTypeData.MovementSpeed * Time.deltaTime);
-        if(position.x > 30f)
-            position.x = 30f;
-        if(position.x < -30f)
-            position.x = -30f;
-        if(position.y > 20f)
-            position.y = 20f;
-        if(position.y < -20f)
-            position.y = -20f;
-
-        transform.position = position;
+        _moveInput = move;
     }
 
     private void UpdateLookDirection(Vector2 mousePosition)
     {
-        Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(mousePosition);
-
-        Vector2 direction = mouseWorldPosition - transform.position;
-        _player.Visual.transform.rotation = Quaternion.FromToRotation(Vector3.right, direction);
+        _lastMousePosition = mousePosition;
     }
 
     private void Shoot()
     {
-        if (!ConnectionManager.Instance.IsConnectedToGameSever)
-            return;
-
-        if (Time.time - _lastShootTime < _player.PlayerTypeData.ShootingCooldown)
-            return;
-
-        _lastShootTime = Time.time;
-        Vector2Int position = transform.position.ToServer();
-        ConnectionManager.Instance.SendMessageToGameServer(
-            $"{(int)GameManager.OutgoingMessageType.Shoot}" +
-            $";{position.x}" +
-            $";{position.y}" +
-            $";{Mathf.RoundToInt(_player.Visual.transform.eulerAngles.z)};",
-            reliable: true
-            );
+        _isShooting = true;
     }
 
-    private void SendTransformData()
+    private void SendInputData()
     {
         if (!ConnectionManager.Instance.IsConnectedToGameSever)
             return;
 
-        Vector2Int position = transform.position.ToServer();
+        Vector2 normalizedMove = _moveInput.magnitude > 1f ? _moveInput.normalized : _moveInput;
+        int moveX = Mathf.RoundToInt(normalizedMove.x * 100f);
+        int moveY = Mathf.RoundToInt(normalizedMove.y * 100f);
+        int rotation = CalculateTargetRotation();
+        int shootFlag = _isShooting ? 1 : 0;
+
         ConnectionManager.Instance.SendMessageToGameServer(
-            $"{(int)GameManager.OutgoingMessageType.UpdUpdate};" +
-            $"{ConnectionManager.Instance.PlayerID};" +
-            $"{position.x};" +
-            $"{position.y};" +
-            $"{Mathf.RoundToInt(_player.Visual.transform.eulerAngles.z)};",
-            reliable: false
-            );
+             $"{(int)GameManager.OutgoingMessageType.UpdUpdate};" +
+             $"{ConnectionManager.Instance.PlayerID};" +
+             $"{moveX};" +
+             $"{moveY};" +
+             $"{rotation};" +
+             $"{shootFlag};",
+             reliable: false
+             );
+    }
+
+    private int CalculateTargetRotation()
+    {
+        if (Camera.main == null)
+            return Mathf.RoundToInt(_player.Visual.transform.eulerAngles.z);
+
+        Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(_lastMousePosition);
+        Vector2 direction = mouseWorldPosition - transform.position;
+        Quaternion targetRot = Quaternion.FromToRotation(Vector3.right, direction);
+        return Mathf.RoundToInt(targetRot.eulerAngles.z);
     }
 }

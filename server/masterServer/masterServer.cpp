@@ -204,7 +204,7 @@ void ctrl_c(int) {
     exit(0);
 }
 
-void startGameServer(){
+void startGameServer(int gameMode){
     int sv[2];
     if (socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sv) != 0) { 
         perror("socketpair"); return; 
@@ -220,18 +220,19 @@ void startGameServer(){
         fcntl(sv[1], F_SETFD, fcntl(sv[1], F_GETFD) & ~FD_CLOEXEC);
 
         std::string fdstr = std::to_string(sv[1]);
-        execl("./build/gameServer", "gameServer", fdstr.c_str(), (char*)nullptr);
+        std::string gameModeStr = std::to_string(gameMode);
+        execl("./build/gameServer", "gameServer", fdstr.c_str(), gameModeStr.c_str(), (char*)nullptr);
         _exit(127);
     }
 
     close(sv[1]);
 
     connectionService.createConnection(sv[0], onNewServerMessage, onGameServerDisconnected, sockaddr_in{}, true);
-    printf("[MasterServer] Started game server. FD: %d GameServerFD: %d\n", sv[0], sv[1]);
+    printf("[MasterServer] Started game server (gamemode: %d). FD: %d GameServerFD: %d\n",gameMode, sv[0], sv[1]);
 }
 
 void handleMsgStartGame(Player& player, const incomingPlayerMessages::StartGameMessage& message) {
-    printf("[MasterServer] Handling start game message for player %d\n", player.id);
+    printf("[MasterServer] Handling start game message for player %d Gamemode: %d\n", player.id, message.gameMode);
     if(isGameServerActive){
         outgoingMessages::GameServerInfo gameServerInfoMessage { .tcpPort = gameServerData.tcpPort };
         printf("[MasterServer] Sending game server info to player %d. Message: %s\n", player.id, gameServerInfoMessage.Build().c_str());
@@ -243,6 +244,6 @@ void handleMsgStartGame(Player& player, const incomingPlayerMessages::StartGameM
 
     if(!isGameServerActivating){
         isGameServerActivating = true;
-        startGameServer();
+        startGameServer(message.gameMode);
     }
 }

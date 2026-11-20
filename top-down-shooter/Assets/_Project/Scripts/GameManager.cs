@@ -100,15 +100,11 @@ public class GameManager : Singleton<GameManager>
     public void SpawnLocalPlayer(int playerTypeIndex)
     {
         UIManager.Instance.LeaderboardUI.Open();
-        PlayerTypeData playerTypeData = _playerTypes[playerTypeIndex];
         ConnectionManager.Instance.SendMessageToGameServer(
             $"{(int)OutgoingMessageType.Init};" +
             $"{ConnectionManager.Instance.LocalUdpPort};" +
             $"{UIManager.Instance.LobbyUI.PlayerName};" +
-            $"{playerTypeIndex};{playerTypeData.BulletDamage};" +
-            $"{playerTypeData.BulletSpeed};" +
-            $"{playerTypeData.StartingHealth};" +
-            $"{(int)SelectedGameType};",
+            $"{playerTypeIndex};",
             reliable: true
             );
     }
@@ -334,9 +330,6 @@ public class GameManager : Singleton<GameManager>
                 Debug.LogWarning($"Player with ID:{playerId} doesn't exist");
                 continue;
             }
-
-            if (LocalPlayer == player)
-                continue;
 
             Vector2Int position = new(positionX, positionY);
             player.SetPositionAndRotation(position.ToLocal(), rotation);

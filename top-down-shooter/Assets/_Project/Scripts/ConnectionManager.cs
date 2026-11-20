@@ -117,7 +117,7 @@ public class ConnectionManager : Singleton<ConnectionManager>
 
     private async void ConnectToMasterServer()
         {
-            await UniTask.WaitUntil(() => SceneLoader.IsUILoaded);
+            await UniTask.WaitUntil(() => SceneLoader.IsUILoaded && UIManager.Instance != null && UIManager.Instance.InfoUI != null);
 
             _masterServerCts?.Cancel();
             _masterServerCts?.Dispose();

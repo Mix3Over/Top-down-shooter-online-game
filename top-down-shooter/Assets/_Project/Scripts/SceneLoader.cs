@@ -17,6 +17,7 @@ public class SceneLoader : MonoBehaviour
     private static void ResetStatics()
     {
         _isGameLoadingOrLoaded = false;
+        IsUILoaded = false;
     }
 #endif
 

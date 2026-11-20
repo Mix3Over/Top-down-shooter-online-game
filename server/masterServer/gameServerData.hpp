@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/connectionService.hpp"
-#include "common/gameType.hpp"
+#include "common/GameType.hpp"
 
 class GameServerData {
   public:
