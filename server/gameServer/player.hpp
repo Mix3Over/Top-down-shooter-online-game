@@ -27,7 +27,7 @@ class Player {
     float movementSpeed = 0.0f;
     int shootingCooldown = 500;
     float bulletSize = 0.2f;
-    std::chrono::high_resolution_clock::time_point lastShootTime{};
+    std::chrono::steady_clock::time_point lastShootTime{};
 
     int inputMoveX = 0;
     int inputMoveY = 0;
