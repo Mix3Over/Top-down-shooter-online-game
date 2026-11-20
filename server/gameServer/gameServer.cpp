@@ -27,7 +27,7 @@ int tickCount = 0;
 int nextPlayerID = 0;
 int nextBulletID = 0;
 
-std::chrono::high_resolution_clock::time_point lastActivePlayerTime;
+std::chrono::steady_clock::time_point lastActivePlayerTime;
 
 GameType currentGameType = GameType::FFA;
 
@@ -240,7 +240,7 @@ void spawnBulletForPlayer(Player &player)
 
 void playersUpdate(int deltaTime)
 {
-    auto now = std::chrono::high_resolution_clock::now();
+    auto now = std::chrono::steady_clock::now();
 
     for (auto &[id, player] : idToPlayer)
     {
@@ -265,9 +265,9 @@ void playersUpdate(int deltaTime)
         if (player->positionX < -3000)
             player->positionX = -3000;
         if (player->positionY > 2000)
-            player->positionX = 2000;
+            player->positionY = 2000;
         if (player->positionY < -2000)
-            player->positionX = -2000;
+            player->positionY = -2000;
 
         if (player->isShooting)
         {
@@ -437,32 +437,37 @@ int main(int argc, char **argv) {
 
     using namespace std::chrono;
 
-    auto lastTickTime = high_resolution_clock::now();
+    auto lastTickTime = steady_clock::now();
     lastActivePlayerTime = lastTickTime;
 
     while (true) {
-        auto duration = high_resolution_clock::now() - lastTickTime;
-        auto deltaTime = duration_cast<milliseconds>(duration).count();
+        auto now = steady_clock::now();
+        auto deltaTime = duration_cast<milliseconds>(now - lastTickTime).count();
 
         if(idToPlayer.empty()){
-            auto durationSinceLastActivePlayer = duration_cast<milliseconds>(high_resolution_clock::now() - lastActivePlayerTime).count();
+            auto durationSinceLastActivePlayer = duration_cast<milliseconds>(now - lastActivePlayerTime).count();
 
             if(durationSinceLastActivePlayer >= noActivePlayerTimeout){
                 printf("[GameServer] No active players for %d ms. Shutting down.\n", noActivePlayerTimeout);
                 ctrl_c(0);
             }
         } else {
-            lastActivePlayerTime = high_resolution_clock::now();
+            lastActivePlayerTime = now;
         }
 
         if(deltaTime >= cooldown){
+            if (deltaTime > 100) deltaTime = 100;
+            auto t0 = steady_clock::now();
             tickUpdate(deltaTime);
+
             tickCount++;
-            lastTickTime = high_resolution_clock::now();
+            lastTickTime = steady_clock::now();
             continue;
         }
 
-        int timeLeftToNextTick = cooldown - deltaTime;
+        int timeLeftToNextTick = cooldown - (int)deltaTime;
+        if (timeLeftToNextTick < 1) timeLeftToNextTick = 1;
+        if (timeLeftToNextTick > cooldown) timeLeftToNextTick = cooldown;
 
         connectionService.listenForEvents(timeLeftToNextTick);
     }

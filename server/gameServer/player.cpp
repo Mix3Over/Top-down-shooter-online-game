@@ -27,7 +27,7 @@ void Player::Initialize(int udpPort, std::string name, int type) {
     this->inputMoveX = 0;
     this->inputMoveY = 0;
     this->isShooting = false;
-    this->lastShootTime = std::chrono::high_resolution_clock::now()-std::chrono::milliseconds(config.shootingCooldown);
+    this->lastShootTime = std::chrono::steady_clock::now()-std::chrono::milliseconds(config.shootingCooldown);
 
     this->isInitialized = true;
     this->isAlive = true;
