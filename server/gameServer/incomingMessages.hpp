@@ -14,9 +14,8 @@ namespace incomingPlayerMessages {
         int udpPort = 0;
         std::string name;
         int type = 0;
-        int gameType = 0;
 
-        auto Fields() { return std::tie(udpPort, name, type, gameType); }
+        auto Fields() { return std::tie(udpPort, name, type); }
     };
 
     struct ShootMessage : IncomingMessage<ShootMessage> {

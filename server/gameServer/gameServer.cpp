@@ -171,9 +171,7 @@ void handleMsgUdpUpdate(const incomingPlayerMessages::UDP_UpdateMessage& message
 }
 
 void handleMsgInit(Player& player, const incomingPlayerMessages::InitMessage& message) {
-    currentGameType = (GameType)message.gameType;
-    printf("[GameServer] Selected game type: %d\n", (int)currentGameType);
-
+    
     player.Initialize(message.udpPort, message.name, message.type);
     printf("[GameServer] Player initialized: %d\n", player.isAlive);
 
@@ -401,11 +399,12 @@ void tickUpdate(int deltaTime){
 void ctrl_c(int);
 
 int main(int argc, char **argv) {
-    if (argc != 2) 
-        error(1, 0, "Usage: %s <tcp-port>", argv[0]);
+    if (argc != 3) 
+        error(1, 0, "Usage: %s <tcp-port> <gamemode>", argv[0]);
 
     int masterServerFd = atoi(argv[1]);
-    printf("arg1 %d\n", masterServerFd);
+    currentGameType = (GameType)atoi(argv[2]);
+    printf("[GameServer] Started with port=%d, gameMode=%d\n", masterServerFd, (int)currentGameType);
 
     srand(time(0));
 

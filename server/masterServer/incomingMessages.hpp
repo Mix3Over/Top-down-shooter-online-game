@@ -9,7 +9,7 @@ namespace incomingPlayerMessages {
     };
 
     struct StartGameMessage : IncomingMessage<StartGameMessage> {
-
+        int gameMode = 0;
         auto Fields() { return std::tie(); }
     };
 }
