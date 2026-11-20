@@ -1,6 +1,3 @@
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks.Dataflow;
 using UnityEngine;
 
 [RequireComponent(typeof(Player))]
@@ -10,6 +7,8 @@ public class PlayerController : MonoBehaviour
     private bool _isShooting;
     private Vector2 _moveInput;
     private Vector2 _lastMousePosition;
+    private float _sendTimer;
+    private const float SendInterval = 1f / 32f;
 
     private void Awake()
     {
@@ -32,10 +31,14 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        SendInputData();
-
-        _moveInput = Vector2.zero;
-        _isShooting = false;
+        _sendTimer += Time.deltaTime;
+        if (_sendTimer >= SendInterval)
+        {
+            _sendTimer = 0f;
+            SendInputData();
+            _moveInput = Vector2.zero;
+            _isShooting = false;
+        }
     }
 
     private void Move(Vector2 move)
@@ -59,8 +62,8 @@ public class PlayerController : MonoBehaviour
             return;
 
         Vector2 normalizedMove = _moveInput.magnitude > 1f ? _moveInput.normalized : _moveInput;
-        int moveX = MathF.RoundToInt(normalizedMove.X * 100f);
-        int moveY = MathF.RoundToInt(normalizedMove.Y * 100f);
+        int moveX = Mathf.RoundToInt(normalizedMove.x * 100f);
+        int moveY = Mathf.RoundToInt(normalizedMove.y * 100f);
         int rotation = CalculateTargetRotation();
         int shootFlag = _isShooting ? 1 : 0;
 
@@ -78,11 +81,11 @@ public class PlayerController : MonoBehaviour
     private int CalculateTargetRotation()
     {
         if (Camera.main == null)
-            return MathF.RoundToInt(_player.Visual.transform.eulerAngles.z);
+            return Mathf.RoundToInt(_player.Visual.transform.eulerAngles.z);
 
         Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(_lastMousePosition);
         Vector2 direction = mouseWorldPosition - transform.position;
         Quaternion targetRot = Quaternion.FromToRotation(Vector3.right, direction);
-        return MathF.RoundToInt(targetRot.eulerAngles.z);
+        return Mathf.RoundToInt(targetRot.eulerAngles.z);
     }
 }
