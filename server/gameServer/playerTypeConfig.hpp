@@ -13,11 +13,11 @@ struct PlayerTypeConfig {
 inline const std::vector<PlayerTypeConfig> PlayerTypeConfigs = {
     {
         .startingHealth = 50,
-        .movementSpeed = 6.0f,
+        .movementSpeed = 12.0f,
         .shootingCooldown = 800,
         .bulletDamage = 35,
         .bulletSize = 0.2f,
-        .bulletSpeed = 12
+        .bulletSpeed = 20
     },
     {
         .startingHealth = 100,
