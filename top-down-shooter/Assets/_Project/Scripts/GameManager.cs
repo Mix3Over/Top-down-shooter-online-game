@@ -104,8 +104,7 @@ public class GameManager : Singleton<GameManager>
             $"{(int)OutgoingMessageType.Init};" +
             $"{ConnectionManager.Instance.LocalUdpPort};" +
             $"{UIManager.Instance.LobbyUI.PlayerName};" +
-            $"{playerTypeIndex};"+
-            $"{(int)SelectedGameType};",
+            $"{playerTypeIndex};",
             reliable: true
             );
     }
