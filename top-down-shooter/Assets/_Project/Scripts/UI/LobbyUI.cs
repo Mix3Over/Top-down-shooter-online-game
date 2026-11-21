@@ -51,9 +51,7 @@ public class LobbyUI : UIWindow
 
     private void OnGameModeSelected(int gameTypeIndex)
     {
-        GameManager.SelectedGameType = (GameType)gameTypeIndex;
-        Debug.Log("Selected game mode: " + GameManager.SelectedGameType);
-
+        GameManager.SetGameType(gameTypeIndex);
         ConnectionManager.Instance.ConnectToGameServer(_nameInputField.text);
         Close();
     }

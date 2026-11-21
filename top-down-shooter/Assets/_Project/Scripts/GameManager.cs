@@ -37,6 +37,7 @@ public class GameManager : Singleton<GameManager>
     }
 
     public static event Action PlayerScoresUpdated;
+    public static GameType SelectedGameType {get; private set;} = GameType.FFA;
 
     [SerializeField] private List<PlayerTypeData> _playerTypes;
     [SerializeField] private CinemachineCamera _playerCamera;
@@ -50,15 +51,13 @@ public class GameManager : Singleton<GameManager>
     private readonly Dictionary<int, Player> _players = new ();
     private readonly Dictionary<int, Bullet> _bullets = new ();
 
-    public static GameType SelectedGameType {get; set;} = GameType.FFA;
-
     private Dictionary<IncomingMessageType, Action<string>> _incomingMessagesHandlers;
 
     protected override void Awake()
     {
         base.Awake();
 
-        _incomingMessagesHandlers = new Dictionary<IncomingMessageType, Action<string>>()
+        _incomingMessagesHandlers = new Dictionary<IncomingMessageType, Action<string>>
         {
             { IncomingMessageType.InitLocalPlayer, InitLocalPlayer },
             { IncomingMessageType.InitPlayers, InitPlayers },
@@ -91,7 +90,7 @@ public class GameManager : Singleton<GameManager>
         ConnectionManager.GameMessageReceived -= OnMessageReceived;
     }
 
-    public void SetGameType(int gameTypeIndex)
+    public static void SetGameType(int gameTypeIndex)
     {
         SelectedGameType = (GameType)gameTypeIndex;
         Debug.Log("Wybrano tryb gry: " + SelectedGameType);
@@ -133,7 +132,7 @@ public class GameManager : Singleton<GameManager>
 
     private void UpdatePlayerScores(string message)
     {
-        Debug.Log("Received score update");
+        // Debug.Log("Received score update");
         string[] playersData = message.Split("!");
 
         foreach (string playerData in playersData) {

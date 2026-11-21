@@ -371,6 +371,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5090303625155595123, guid: 2fe4ac63e5701604c92ba43c84937674, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 47.2854
+      objectReference: {fileID: 0}
     - target: {fileID: 5279807622463672869, guid: 2fe4ac63e5701604c92ba43c84937674, type: 3}
       propertyPath: m_Name
       value: MainMenu
